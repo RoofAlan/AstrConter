@@ -17,9 +17,10 @@ sudo apt update && sudo apt install make apt clang nasm xorriso qemu-system
 如果您是Windows用户，可以使用Cygwin或WSL搭建环境并编译
 
 ## 构建
-**Clone** 将项目克隆到本地
-**Make** 使用make命令进行编译
-**Run！** 使用make run运行打包好的iso镜像、make runk运行内核、make run-db运行打包好的镜像并伴随着调试模式、make runk-db同理
+1. **Clone** 将项目克隆到本地
+2. **Make** 使用make命令进行编译
+3. **Run！** 使用make run运行打包好的iso镜像、make runk运行内核、make run-db运行打包好的镜像并伴随着调试模式、make runk-db同理
+4. **Clean** 使用make clean清除编译完成的产物
 
 ## 外部链接
 **Uinxed-Kernel** https://github.com/ViudiraTech/Uinxed-Kernel
