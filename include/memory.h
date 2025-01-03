@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef UINXED_KERNEL_MEMORY_H
-#define UINXED_KERNEL_MEMORY_H
+#ifndef INCLUDE_MEMORY_H_
+#define INCLUDE_MEMORY_H_
 
 #include "multiboot.h"
 #include "types.h"
@@ -27,6 +27,10 @@
 
 #define INDEX_FROM_BIT(a) (a / (8*4))
 #define OFFSET_FROM_BIT(a) (a % (8*4))
+
+#define page_line(ptr) do { \
+	alloc_frame_line(get_page((uint32_t)ptr, 1, current_directory), (uint32_t)ptr, 1, 1);                       \
+} while(0)
 
 typedef struct page {
 	uint8_t present: 1;
@@ -124,4 +128,4 @@ size_t kmalloc_usable_size(void *cp);
 /* 重新分配内存区域 */
 void *krealloc(void *cp, size_t nbytes);
 
-#endif // UINXED_KERNEL_MEMORY_H
+#endif // INCLUDE_MEMORY_H_

@@ -13,6 +13,7 @@
 #include "printk.h"
 #include "common.h"
 #include "timer.h"
+#include "memory.h"
 
 uint16_t SLP_TYPa;
 uint16_t SLP_TYPb;
@@ -33,18 +34,18 @@ acpi_facp_t *facp; // fixed ACPI table
 int acpi_enable_flag;
 uint8_t *rsdp_address;
 
-HpetInfo *hpetInfo = NULL;
+HpetInfo *hpetInfo = 0;
 uint32_t hpetPeriod = 0;
 
 /* 初始化高级配置与电源接口（ACPI） */
 void acpi_init(void)
 {
-	print_busy("ACPI: Initializing ...\r"); // 提示用户正在初始化ACPI，并回到行首等待覆盖
+	print_busy("Initializing Advanced Configuration and Power Interface...\r"); // 提示用户正在初始化ACPI，并回到行首等待覆盖
 	acpi_sys_init();
 	acpi_enable_flag = !acpi_enable();
 	hpet_initialize();
 	acpi_power_init();
-	print_succ("ACPI: Initializing successfully\n");
+	print_succ("The Advanced Configuration and Power Interface initialization is successful.\n");
 }
 
 /* 系统ACPI初始化 */
@@ -54,13 +55,15 @@ int acpi_sys_init(void)
 	uint32_t entrys;
 
 	rsdt = (acpi_rsdt_t *) AcpiGetRSDPtr();
+	page_line(rsdt);
 	if (!rsdt || acpi_check_header(rsdt, (uint8_t*)"RSDT") < 0) {
-		print_warn("ACPI: Unable to find ACPI\n");
-		return false;
+		print_warn("Unable to find Advanced Configuration and Power Interface.\n");
+		return 0;
 	}
 	entrys = rsdt->length - HEADER_SIZE / 4;
 	p = &(rsdt->entry);
 	while (entrys--) {
+		page_line(*p);
 		if (!acpi_check_header(*p, (uint8_t*)"FACP")) {
 			facp = (acpi_facp_t *) *p;
 
@@ -82,6 +85,7 @@ int acpi_sys_init(void)
 
 			uint8_t * S5Addr;
 			uint32_t dsdtlen;
+			page_line(facp->DSDT);
 
 			if (!acpi_check_header(facp->DSDT, (uint8_t*)"DSDT")) {
 				S5Addr = &(facp->DSDT->definition_block);
@@ -115,7 +119,7 @@ int acpi_sys_init(void)
 			} else {
 				print_warn("Advanced Configuration and Power Interface: No DSDT Table found!\n");
 			}
-			return true;
+			return 1;
 		}
 		++p;
 	}
@@ -133,7 +137,7 @@ int acpi_enable(void)
 	if (SMI_CMD && ACPI_ENABLE) {
 		outb((uint16_t)
 		SMI_CMD, ACPI_ENABLE);
-	
+
 		for (i = 0; i < 300; i++) {
 			if (inw((uint32_t) PM1a_CNT) & SCI_EN) {
 				break;
@@ -190,6 +194,7 @@ void hpet_initialize(void)
 {
 	HPET *hpet = (HPET *)(unsigned long)acpi_find_table("HPET");
 	hpetInfo = (HpetInfo *) hpet->hpetAddress.address;
+	page_line(hpetInfo);
 	uint32_t counterClockPeriod = hpetInfo->generalCapabilities >> 32;
 	hpetPeriod = counterClockPeriod / 1000000;
 	hpetInfo->generalConfiguration |= 1;
@@ -268,7 +273,7 @@ uint8_t *AcpiGetRSDPtr(void)
 	uint32_t ebda;
 
 	for (addr = (uint32_t *) 0x000E0000; addr < (uint32_t *) 0x00100000; addr += 0x10 / sizeof(addr)) {
-		rsdt = (uint32_t *)AcpiCheckRSDPtr(addr);
+         rsdt = (uint32_t *)AcpiCheckRSDPtr(addr);
 		if (rsdt) {
 			return (uint8_t *)rsdt;
 		}
@@ -278,7 +283,7 @@ uint8_t *AcpiGetRSDPtr(void)
 	#pragma GCC diagnostic ignored "-Warray-bounds"
 	ebda = *(uint16_t *) 0x40E;
 	#pragma GCC diagnostic pop
-	
+
 	ebda = ebda * 0x10 & 0xfffff;
 	for (addr = (uint32_t *)ebda; addr < (uint32_t * )(ebda + 1024); addr += 0x10 / sizeof(addr)) {
 		rsdt = (uint32_t *)AcpiCheckRSDPtr(addr);
@@ -286,13 +291,13 @@ uint8_t *AcpiGetRSDPtr(void)
 			return (uint8_t *)rsdt;
 		}
 	}
-	return NULL;
+	return 0;
 }
 
 /* 检查ACPI表头 */
 int acpi_check_header(void *ptr, uint8_t *sign)
 {
-	uint8_t * bptr = ptr;
+	uint8_t *bptr = ptr;
 	uint32_t len = *(bptr + 4);
 	uint8_t checksum = 0;
 	if (!memcmp(bptr, sign, 4)) {
@@ -309,12 +314,11 @@ unsigned int acpi_find_table(const char *Signature)
 {
 	uint8_t * ptr, *ptr2;
 	uint32_t len;
-	uint8_t * rsdt_t = (uint8_t *)
-	rsdt;
+	uint8_t * rsdt_t = (uint8_t *)rsdt;
 	for (len = *((uint32_t *)(rsdt_t + 4)), ptr2 = rsdt_t + 36; ptr2 < rsdt_t + len;
-         ptr2 += (*(uint8_t *)rsdt_t == 'X') ? 8 : 4) {
+		ptr2 += (*(uint8_t *)rsdt_t == 'X') ? 8 : 4) {
 		ptr = (uint8_t * )(uintptr_t)(rsdt_t[0] == 'X' ? *((uint64_t *) ptr2)
-													: *((uint32_t *) ptr2));
+              : *((uint32_t *) ptr2));
 		if (!memcmp(ptr, Signature, 4)) {
 			return (unsigned) ptr;
 		}
@@ -340,7 +344,7 @@ uint8_t *AcpiCheckRSDPtr(void *ptr)
 			return (uint8_t * ) rsdp->rsdt;
 		}
 	}
-	return NULL;
+	return 0;
 }
 
 /* 获取多处理器系统的中断控制器表基地址 */
@@ -348,7 +352,7 @@ uint32_t AcpiGetMadtBase(void)
 {
 	uint32_t entrys = rsdt->length - HEADER_SIZE / 4;
 	uint32_t **p = &(rsdt->entry);
-	acpi_madt_t *madt = NULL;
+	acpi_madt_t *madt = 0;
 	while (--entrys) {
 		if (!acpi_check_header(*p, (uint8_t*)"APIC")) {
 			madt = (acpi_madt_t *) *p;
@@ -362,7 +366,7 @@ uint32_t AcpiGetMadtBase(void)
 /* 获取纳秒级时间 */
 uint32_t nano_time(void)
 {
-	if(hpetInfo == NULL) return 0;
+	if(hpetInfo == 0) return 0;
 	uint32_t mcv =  hpetInfo->mainCounterValue;
 	return mcv * hpetPeriod;
 }
