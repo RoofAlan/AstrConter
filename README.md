@@ -24,5 +24,5 @@ sudo apt update && sudo apt install make apt clang nasm xorriso qemu-system
 
 ## 外部链接
 
-- Uinxed-Kernel [https://github.com/ViudiraTech/Uinxed-Kernel] (ViudiraTech/Uinxed-Kernel)
-- OS-Dev [https://wiki.osdev.org] (https://wiki.osdev.org)
+- Uinxed-Kernel [https://github.com/ViudiraTech/Uinxed-Kernel](https://github.com/ViudiraTech/Uinxed-Kernel)
+- OS-Dev [https://wiki.osdev.org](https://wiki.osdev.org)
