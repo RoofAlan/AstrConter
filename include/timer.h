@@ -54,7 +54,7 @@ void sleep(uint32_t timer);
 struct TIMER *timer_alloc(void);
 
 /* 获取当前时间戳 */
-unsigned int time(void);
+double get_current_time(void);
 
 /* 初始化可编程间隔定时器 */
 void init_pit(void);

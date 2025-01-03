@@ -52,50 +52,8 @@ void get_cur_status(uint16_t* ring, uint16_t* regs1, uint16_t* regs2, uint16_t* 
 /* 内核异常 */
 void panic(const char *msg)
 {
-	terminal_destroy();
-
-	uint16_t ring = 0, regs1 = 0, regs2 = 0, regs3 = 0, regs4 = 0;
-	uint32_t eips[5];
-	const char *syname[5];
-	int ps = 0, sy = 0;
-	char *vendor, *model_name;
-	int phys_bits, virt_bits;
-	volatile size_t eax, ebx, ecx, edx, esi, edi, ebp, esp;
-	volatile size_t fs, gs;
-
-	get_cpu_info(&vendor, &model_name, &phys_bits, &virt_bits);
-	get_cur_status(&ring, &regs1, &regs2, &regs3, &regs4);
-	get_stack_trace(eips, syname);
-
-	asm("mov %%eax, %0\n\t" : "=r"(eax));
-	asm("mov %%ebx, %0\n\t" : "=r"(ebx));
-	asm("mov %%ecx, %0\n\t" : "=r"(ecx));
-	asm("mov %%edx, %0\n\t" : "=r"(edx));
-	asm("mov %%esi, %0\n\t" : "=r"(esi));
-	asm("mov %%edi, %0\n\t" : "=r"(edi));
-	asm("mov %%ebp, %0\n\t" : "=r"(ebp));
-	asm("mov %%esp, %0\n\t" : "=r"(esp));
-
-	asm("mov %%fs, %0\n\t" : "=r"(fs));
-	asm("mov %%gs, %0\n\t" : "=r"(gs));
-
-	vbe_clear_color(0x00000a);
-	bmp_analysis((Bmp *)klogo, vbe_get_width() - 200, 0, 0);
-	vbe_printk(": (\nYour computer ran into a problem. Try to restart your computer and try again\n");
-	vbe_printk("\n*** STOP - Kernel-Panic: %s\n\n", msg);
-	vbe_printk("CPUID: %s %s | phy/virt: %d/%d bits\n", vendor, model_name, phys_bits, virt_bits);
-	vbe_printk("Current Task: %s | PID: %d\n\n", current->name, current->pid);
-	vbe_printk("[SYM\n");
-	for (int i = 0; i < 5; i++) {
-		vbe_printk("  0x%08X: %s\n", eips[ps++], syname[sy++]);
-	
-	}
-	vbe_printk("]");
-	vbe_printk("\nEAX:    [0x%08X] EBX: [0x%08X] ECX: [0x%08X]\n", eax, ebx, ecx);
-	vbe_printk("EDX:    [0x%08X] ESI: [0x%08X] EDI: [0x%08X]\n", edx, esi, edi);
-	vbe_printk("EBP:    [0x%08X] ESP: [0x%08X] EFL: [0x%08X]\n", ebp, esp, load_eflags());
-	vbe_printk("FS:     [0x%04X]     GS:  [0x%04X]\n", fs, gs);
-	vbe_printk("\nSTATUS: [RING: 0x%04X][CS: 0x%04X][DS: 0x%04X][ES: 0x%04X][SS: 0x%04X]\n", ring, regs1, regs2, regs3, regs4);
+	print_time("Kernel panic - not syncing: ");
+	printk("%s\n");
 	krn_halt();
 }
 
