@@ -29,6 +29,7 @@
 #include "elf.h"
 #include "bmp.h"
 #include "klogo.lib.h"
+#include "mouse.h"
 
 #define MAX_COMMAND_LEN	100
 #define MAX_ARG_NR		30
@@ -256,6 +257,13 @@ void shell_slogo(int argc, char *argv[])
 	bmp_analysis((Bmp *)klogo, vbe_get_width() / 2 - 150, 100, 0);
 }
 
+void shell_ms(int argc, char *argv[]) {
+	while(1) {
+		printk("X: %d Y: %d          \r", get_mouse_x(), get_mouse_y());
+		bmp_analysis((Bmp *)mlogo ,get_mouse_x(), get_mouse_y(), 0);
+	}
+}
+
 typedef struct builtin_cmd
 {
 	const char *name;
@@ -278,7 +286,8 @@ builtin_cmd_t builtin_cmds[] = {
 	{"cd", (void (*)(int, char **))shell_cd},
 	{"ls", (void (*)(int, char **))shell_ls},
 	{"cetsl", shell_cetsl},
-	{"slogo", shell_slogo}
+	{"slogo", shell_slogo},
+	{"ms", shell_ms}
 };
 
 /* 内建命令数量 */
