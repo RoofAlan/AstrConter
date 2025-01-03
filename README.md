@@ -23,4 +23,6 @@ sudo apt update && sudo apt install make apt clang nasm xorriso qemu-system
 4. **Clean** 使用make clean清除编译完成的产物
 
 ## 外部链接
-**Uinxed-Kernel** https://github.com/ViudiraTech/Uinxed-Kernel
+
+- Uinxed-Kernel [https://github.com/ViudiraTech/Uinxed-Kernel] (ViudiraTech/Uinxed-Kernel)
+- OS-Dev [https://wiki.osdev.org] (https://wiki.osdev.org)
