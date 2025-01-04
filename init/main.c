@@ -60,21 +60,22 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	}
 
 	print_succ("");
-	printk("AstrConter-Kernel "KERNL_VERS" %s (build-%d) Powered by Uinxed-kernel -- of Viudira\n",OS_INFO_ ,KERNL_BUID);
+	printlog_serial("AstrConter-Kernel "KERNL_VERS" %s (build-%d) Powered by Uinxed-kernel -- of Viudira\n",OS_INFO_ ,KERNL_BUID);
 	print_succ("");
-	printk("KernelArea: 0x00000000 - 0x%08X | GraphicsBuffer: 0x%08X\n", program_break_end,
+	printlog_serial("KernelArea: 0x00000000 - 0x%08X | GraphicsBuffer: 0x%08X\n", program_break_end,
                                                                     	 glb_mboot_ptr->framebuffer_addr);
 	init_cmdline(glb_mboot_ptr);
 	if(find_cmdline_args("klogo=on", get_cmdline(), get_cmdline_count()) == 0) {
 		bmp_analysis((Bmp *)klogo, vbe_get_width() - 200, 0, 1);
 	}
+	if(strcmp(find_cmdargs("kernel-log",get_cmdline(), get_cmdline_count()), "serial") == 0) klog_to(1);
 	char *vdr, *mdn;
 	int pbs, vbs; 
 	get_cpu_info(&vdr, &mdn, &pbs, &vbs);
 	print_succ("");
-	printk("CPU name: %s | Vendor: %s\n", mdn, vdr);
+	printlog_serial("CPU name: %s | Vendor: %s\n", mdn, vdr);
 	print_succ("");
-	printk("CPU cache: %d | Virtual Address 0x%x\n", pbs, vbs);
+	printlog_serial("CPU cache: %d | Virtual Address 0x%x\n", pbs, vbs);
 
 	init_gdt();
 	init_idt();
@@ -125,7 +126,7 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	
 	enable_scheduler();
 	print_succ("");
-	printk("AstrCounter On tty%d\n", get_boot_tty());
+	printlog_serial("AstrCounter On tty%d\n", get_boot_tty());
 	if(find_cmdline_args("dbg-shell=on",get_cmdline(), get_cmdline_count()) == 0) {
 		kernel_thread(kthread_shell, (void *)((glb_mboot_ptr->flags&MULTIBOOT_INFO_CMDLINE)?glb_mboot_ptr->cmdline:0), "Shell", USER_TASK);
 	} else {
@@ -140,6 +141,7 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 			print_erro("No working init found '/sbin/init'\n");
 		}
 	}
+	klog_to(1);
 	terminal_set_auto_flush(0);
 	while(1) {
 		uint32_t eflags = load_eflags();

@@ -21,12 +21,19 @@
 #include "acpi.h"
 #include "cmos.h"
 
+int klog_to_serial;
+
 /* 打印带有”[ ** ]“的字符串 */
 #ifndef print_busy
 void print_busy(const char *str)
 {
 	//print_succ(str);
-	printk("[  \033[31m**\033[0m ]  %s", str);
+	if (klog_to_serial==0) {
+		printk("[    \033[31m**\033[0m    ]  %s", str);
+	} else {
+		write_serial_string("[    \033[31m**\033[0m    ] ");
+		write_serial_string(str);
+	}
 }
 #endif
 
@@ -35,7 +42,12 @@ void print_busy(const char *str)
 void print_succ(const char *str)
 {
 	//uint32_t osu = nano_time();
-	printk("[   \033[32mOK\033[0m   ] %s" ,str);
+	if(klog_to_serial == 0) {
+		printk("[   \033[32mOK\033[0m   ] %s" ,str);
+	} else {
+		write_serial_string("[    \033[32mOK\033[0m    ] ");
+		write_serial_string(str);
+	}
 }
 #endif
 
@@ -43,7 +55,12 @@ void print_succ(const char *str)
 /* 打印带有”[ WARN ]“的字符串 */
 void print_warn(const char *str)
 {
-	printk("[  \033[33mWARN\033[0m  ] %s", str);
+	if(klog_to_serial == 0) {
+		printk("[  \033[33mWARN\033[0m  ] %s", str);
+	} else {
+		write_serial_string("[   \033[33mWARN\033[0m   ] ");
+		write_serial_string(str);
+	}
 }
 #endif
 
@@ -51,23 +68,77 @@ void print_warn(const char *str)
 /* 打印带有”[ ERRO ]“的字符串 */
 void print_erro(const char *str)
 {
-	printk("[  \033[31mERRO\033[0m  ] %s", str);
+	if (klog_to_serial == 0) {
+		printk("[  \033[31mERRO\033[0m  ] %s", str);
+	} else {
+		printk_serial("[   \033[31mERRO\033[0m   ] %s", str);
+	}
 }
 #endif
+
+/* 内核日志输出位置(serial or TTY) */
+void klog_to(int serial) {
+	if(serial == 0) {
+		klog_to_serial = 0;
+	} else {
+		klog_to_serial = 1;
+	}
+}
 
 /* 打印带有[HH:MM:SS]的字符串*/
 void print_time(const char *str)
 {       
+	if(klog_to_serial == 0) {
 		printk("[");
 		printk("%02d:%02d:%02d", get_hour_hex(), get_min_hex(), get_sec_hex());
     	printk("] ");
     	printk("%s", str);
+	} else {
+		printk_serial("[%02d:%02d:%02d] %s",get_hour_hex(),get_min_hex(),get_sec_hex(),str);
+	}
 }
 
 /* 内核打印字符 */
 void putchar(char ch)
 {
 	tty_print_logch(ch);
+}
+
+/* 格式化打印日志 */
+void printlog_serial(const char *format, ...)
+{
+	/* 避免频繁创建临时变量，内核的栈很宝贵 */
+	static char buff[1024];
+	va_list args;
+	int i;
+
+	va_start(args, format);
+	i = vsprintf(buff, format, args);
+	va_end(args);
+
+	buff[i] = '\0';
+	if(klog_to_serial == 0) {
+		printk("%s",buff);
+	} else {
+		write_serial_string(buff);
+	}
+}
+
+/* 格式化打印到串口 */
+void printk_serial(const char *format, ...)
+{
+	/* 避免频繁创建临时变量，内核的栈很宝贵 */
+	static char buff[1024];
+	va_list args;
+	int i;
+
+	va_start(args, format);
+	i = vsprintf(buff, format, args);
+	va_end(args);
+
+	buff[i] = '\0';
+
+	write_serial_string(buff);
 }
 
 /* 内核打印字符串 */

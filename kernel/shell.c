@@ -397,7 +397,8 @@ void shell(const char *cmdline)
 
 		/* argc, argv 都拿到了 */
 		if (argc == -1) {
-			print_erro("shell: number of arguments exceed MAX_ARG_NR(30)");
+			print_erro("shell: number of arguments exceed MAX_ARG_NR(30)\n");
+			printk("Out of MAX_ARGS(30)");
 			continue;
 		} else if (argc == 0) {
 			vbe_write_newline();

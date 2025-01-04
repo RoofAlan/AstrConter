@@ -92,8 +92,8 @@ int init_cmdline(multiboot_t *info) {
 	char **cmdv_ptr = get_cmdline();
 	print_succ("Cmdline: ");
 	for (int i = 0; i < num_tokens; i++) {
-		printk("%s ", cmdv_ptr[i]);
+		printlog_serial("%s ", cmdv_ptr[i]);
 	}
-	printk("\n");
+	printlog_serial("\n");
 	return 0;
 }
