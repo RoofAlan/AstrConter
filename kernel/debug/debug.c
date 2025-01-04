@@ -50,10 +50,21 @@ void get_cur_status(uint16_t* ring, uint16_t* regs1, uint16_t* regs2, uint16_t* 
 }
 
 /* 内核异常 */
-void panic(const char *msg)
+void panic(const char *format, ...)
 {
-	printk("[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---\n", msg); 
-	printk_serial("[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---\n", msg);
+	/* 避免频繁创建临时变量，内核的栈很宝贵 */
+	static char buff[1024];
+	va_list args;
+	int i;
+
+	va_start(args, format);
+	i = vsprintf(buff, format, args);
+	va_end(args);
+
+	buff[i] = '\0';
+
+	//printk("[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---", buff); 
+	printk_serial("[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---", buff);
 	krn_halt();
 }
 

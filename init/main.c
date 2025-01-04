@@ -92,7 +92,7 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	setup_free_page();
 	init_fpu();
 	init_pci();
-	init_serial();
+	init_serial(9600);
 	init_keyboard();
 	mouse_init();
 	init_sched();
@@ -128,7 +128,7 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	
 	enable_scheduler();
 	print_succ("");
-	printlog_serial(INFO_LEVEL,"AstrCounter On tty%d\n", get_boot_tty());
+	printlog_serial(INFO_LEVEL,"AstrCounter On %s\n", get_boot_tty());
 	if(find_cmdline_args("dbg-shell=on",get_cmdline(), get_cmdline_count()) == 0) {
 		kernel_thread(kthread_shell, (void *)((glb_mboot_ptr->flags&MULTIBOOT_INFO_CMDLINE)?glb_mboot_ptr->cmdline:0), "Shell", USER_TASK);
 	} else {
@@ -137,10 +137,10 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 			if (vfs_do_search(vfs_open("/sbin"), "init")) {
 				elf_thread("/sbin/init", 0, "INIT", USER_TASK);
 			} else {
-				panic("Unable to find '/sbin/init'");
+				panic("No working init found");
 			}
 		} else {
-			panic("No working init found '/sbin/init' ");
+			panic("No working init found");
 		}
 	}
 	set_loglevel(0);
