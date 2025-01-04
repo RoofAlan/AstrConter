@@ -52,8 +52,8 @@ void get_cur_status(uint16_t* ring, uint16_t* regs1, uint16_t* regs2, uint16_t* 
 /* 内核异常 */
 void panic(const char *msg)
 {
-	printlog_serial(PANIC_LEVEL,"[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---\n", msg); 
-	//printk_serial("[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---\n", msg);
+	printk("[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---\n", msg); 
+	printk_serial("[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---\n", msg);
 	krn_halt();
 }
 

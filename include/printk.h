@@ -15,7 +15,7 @@
 #define WARN_LEVEL 3
 #define ERRO_LEVEL 2
 #define PANIC_LEVEL 1
-#define DONT_SHOW_LEVEL 0
+#define DONT_SHOW 0
 
 /* 内核打印字符 */
 void putchar(char ch);
