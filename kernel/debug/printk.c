@@ -26,7 +26,7 @@
 void print_busy(const char *str)
 {
 	//print_succ(str);
-	printk("[ \033[32m**\033[0m ] %s", str);
+	printk("[  \033[31m**\033[0m ]  %s", str);
 }
 #endif
 
@@ -35,7 +35,7 @@ void print_busy(const char *str)
 void print_succ(const char *str)
 {
 	//uint32_t osu = nano_time();
-	printk("[   \033[36mOK\033[0m   ] %s" ,str);
+	printk("[   \033[32mOK\033[0m   ] %s" ,str);
 }
 #endif
 
