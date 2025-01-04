@@ -63,6 +63,8 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	set_loglevel_cmdline();
 	print_succ("");
 	printlog_serial(INFO_LEVEL,"AstrConter-Kernel "KERNL_VERS" %s (build-%d) Powered by Uinxed-kernel -- of Viudira\n",OS_INFO_ ,KERNL_BUID);
+	print_succ("");
+	printlog_serial(INFO_LEVEL, "Loglevel: %d\n", get_loglevel());
 	print_cmdline();
 	print_succ("");
 	printlog_serial(INFO_LEVEL,"KernelArea: 0x00000000 - 0x%08X | GraphicsBuffer: 0x%08X\n", program_break_end,

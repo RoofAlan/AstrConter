@@ -98,10 +98,10 @@ void putchar(char ch)
 /* 设置内核日志等级 */
 void set_loglevel(int level)
 {
-	if(level <= 3) {
+	if(level <= 4) {
 		loglevel = level;
 	} else {
-		loglevel = 3;
+		loglevel = 4;
 	}
 }
 
@@ -154,7 +154,7 @@ void set_loglevel_cmdline()
 	}
 	uint8_t **bootargv = (uint8_t **)kmalloc(32768 * sizeof(uint8_t *));
 	if (!bootargv) {
-		set_loglevel(1);
+		set_loglevel(4);
 		return;
 	}
 
@@ -167,7 +167,11 @@ void set_loglevel_cmdline()
 			if (tty_num_len == 1 || tty_num_len == 2) {
 				int log_num = atoi((char *)log_num_str);
 				kfree(bootargv);
-				if (log_num <=3) set_loglevel(log_num);
+				if (log_num <= 4){
+					set_loglevel(log_num);
+				} else {
+					set_loglevel(4);
+				}
 			}
 		}
 	}
