@@ -32,17 +32,11 @@ int get_loglevel();
 /* 更具cmdline设置日志等级 */
 void set_loglevel_cmdline();
 
-/* 获取内核日志的输出位置(1=serial,0 & other = other) */
-int get_klog_to_status();
-
 /* 格式化打印日志 */
 void printlog_serial(int level, const char *format, ...);
 
 /* 格式化打印到串口 */
 void printk_serial(const char *format, ...);
-
-/* 内核日志输出位置(serial or TTY) */
-void klog_to(int serial);
 
 /* 带前缀的打印函数 */
 void print_busy(const char *str); // 打印带有”[ ** ]“的字符串

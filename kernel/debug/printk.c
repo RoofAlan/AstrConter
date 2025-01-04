@@ -22,7 +22,6 @@
 #include "cmos.h"
 #include "memory.h"
 
-int klog_to_serial;
 int loglevel = 4;
 
 /* 打印带有”[ ** ]“的字符串 */
@@ -30,7 +29,7 @@ int loglevel = 4;
 void print_busy(const char *str)
 {
 	//print_succ(str);
-	if (klog_to_serial==0 && loglevel >= 4) {
+	if (loglevel >= 4) {
 		printk("[   \033[31m**\033[0m   ]  %s", str);
 	} else {
 		printk_serial("[   \033[31m**\033[0m   ] %s", str);
@@ -75,15 +74,6 @@ void print_erro(const char *str)
 	}
 }
 #endif
-
-/* 内核日志输出位置(serial or TTY) */
-void klog_to(int serial) {
-	if(serial == 0) {
-		klog_to_serial = 0;
-	} else {
-		klog_to_serial = 1;
-	}
-}
 
 /* 打印带有[HH:MM:SS]的字符串*/
 void print_time(const char *str)

@@ -60,12 +60,10 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 		panic(P001);
 	}
 
-	klog_to(0);
 	set_loglevel_cmdline();
 	print_succ("");
 	printlog_serial(INFO_LEVEL,"AstrConter-Kernel "KERNL_VERS" %s (build-%d) Powered by Uinxed-kernel -- of Viudira\n",OS_INFO_ ,KERNL_BUID);
 	init_cmdline(glb_mboot_ptr);
-	if(strcmp(find_cmdargs("kernel-log",get_cmdline(), get_cmdline_count()), "serial") == 0) klog_to(1);
 	print_succ("");
 	printlog_serial(INFO_LEVEL,"KernelArea: 0x00000000 - 0x%08X | GraphicsBuffer: 0x%08X\n", program_break_end,
                                                                     	 glb_mboot_ptr->framebuffer_addr);
@@ -111,8 +109,7 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 		if(strcmp(find_cmdargs("dbg-shell",get_cmdline(), get_cmdline_count()), "on") == 0) {
 			print_warn("The root file system could not be mounted.\n");
 		} else {
-			print_erro("The root file system could not be mounted.\n");
-			krn_halt();
+			panic("The root file system could not be mounted.");
 		}
 	}
 
@@ -139,13 +136,13 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 			if (vfs_do_search(vfs_open("/sbin"), "init")) {
 				elf_thread("/sbin/init", 0, "INIT", USER_TASK);
 			} else {
-				print_erro("Unable to find '/sbin/init'\n");
+				panic("Unable to find '/sbin/init'");
 			}
 		} else {
-			print_erro("No working init found '/sbin/init'\n");
+			panic("No working init found '/sbin/init' ");
 		}
 	}
-	klog_to(1);
+	set_loglevel(0);
 	terminal_set_auto_flush(0);
 	while(1) {
 		uint32_t eflags = load_eflags();
