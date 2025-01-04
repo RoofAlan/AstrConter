@@ -59,11 +59,11 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	if ((glb_mboot_ptr->mem_upper + glb_mboot_ptr->mem_lower) / 1024 + 1 < 16) {
 		panic(P001);
 	}
-
+	init_cmdline(glb_mboot_ptr);
 	set_loglevel_cmdline();
 	print_succ("");
 	printlog_serial(INFO_LEVEL,"AstrConter-Kernel "KERNL_VERS" %s (build-%d) Powered by Uinxed-kernel -- of Viudira\n",OS_INFO_ ,KERNL_BUID);
-	init_cmdline(glb_mboot_ptr);
+	print_cmdline();
 	print_succ("");
 	printlog_serial(INFO_LEVEL,"KernelArea: 0x00000000 - 0x%08X | GraphicsBuffer: 0x%08X\n", program_break_end,
                                                                     	 glb_mboot_ptr->framebuffer_addr);

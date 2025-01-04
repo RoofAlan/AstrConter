@@ -89,11 +89,16 @@ int init_cmdline(multiboot_t *info) {
 	char *str = (char *)info->cmdline;
 	num_tokens = split_string(str, ' ');
 
-	char **cmdv_ptr = get_cmdline();
-	print_succ("Cmdline: ");
-	for (int i = 0; i < num_tokens; i++) {
-		printlog_serial(INFO_LEVEL,"%s ", cmdv_ptr[i]);
-	}
-	printlog_serial(INFO_LEVEL,"\n");
 	return 0;
+}
+
+/* 打印cmdline信息 */
+void print_cmdline()
+{
+	char **c = get_cmdline();
+	print_succ("Cmdline: ");
+	for (int i=0; i<get_cmdline_count(); i++) {
+		printlog_serial(INFO_LEVEL,"%s ", c[i]);
+	}
+	printlog_serial(INFO_LEVEL, "\n");
 }

@@ -28,4 +28,7 @@ int find_cmdline_args(const char *arg, char **cmdv_input, int num);
 /* 获取参数的值 */
 char *find_cmdargs(const char *arg, char **cmdv_input, int num);
 
+/* 打印cmdline信息 */
+void print_cmdline();
+
 #endif
