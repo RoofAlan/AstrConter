@@ -17,6 +17,9 @@ void putchar(char ch);
 /* 内核打印字符串 */
 void printk(const char *format, ...);
 
+/* 获取内核日志的输出位置(1=serial,0 & other = other) */
+int get_klog_to_status();
+
 /* 格式化打印日志 */
 void printlog_serial(const char *format, ...);
 

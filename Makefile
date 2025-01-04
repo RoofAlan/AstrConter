@@ -20,6 +20,7 @@ ASM				= nasm
 RM				= rm
 QEMU			= qemu-system-x86_64
 QEMU_FLAGS		= -serial stdio -audiodev none,id=speaker -machine pcspk-audiodev=speaker -m 1G
+KERNEL_APPEND = tty=1 klogo=on dbg-shell=on kernel-log=serial 
 
 C_FLAGS			= -MMD -Wall -Werror -Wcast-align -Winline -Wwrite-strings \
                   -c -I include -m32 -O3 -g -DNDEBUG -nostdinc -fno-pic \
@@ -62,7 +63,7 @@ AstrConter.iso: astrknl
 	@echo 'set default=0' >> iso/boot/grub/grub.cfg
 
 	@echo 'menuentry "AstrConter"{' >> iso/boot/grub/grub.cfg
-	@echo '	multiboot /boot/astrknl klogo=on dbg-shell=on tty=1' >> iso/boot/grub/grub.cfg
+	@echo '	multiboot /boot/astrknl $(KERNEL_APPEND)' >> iso/boot/grub/grub.cfg
 	@echo '	boot' >> iso/boot/grub/grub.cfg
 	@echo '}' >> iso/boot/grub/grub.cfg
 
@@ -85,11 +86,11 @@ run_db: AstrConter.iso
 
 .PHONY: runk
 runk: astrknl
-	$(QEMU) $(QEMU_FLAGS) -kernel astrknl
+	$(QEMU) $(QEMU_FLAGS) -kernel astrknl -append "$(KERNEL_APPEND)"
 
 .PHONY: runk_db
 runk_db: astrknl
-	$(QEMU) $(QEMU_FLAGS) -kernel astrknl -d in_asm
+	$(QEMU) $(QEMU_FLAGS) -kernel astrknl -d in_asm -append "$(KERNEL_APPEND)"
 
 .PRECIOUS: $(OBJS)
 

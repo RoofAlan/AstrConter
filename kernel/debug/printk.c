@@ -29,10 +29,9 @@ void print_busy(const char *str)
 {
 	//print_succ(str);
 	if (klog_to_serial==0) {
-		printk("[    \033[31m**\033[0m    ]  %s", str);
+		printk("[   \033[31m**\033[0m   ]  %s", str);
 	} else {
-		write_serial_string("[    \033[31m**\033[0m    ] ");
-		write_serial_string(str);
+		printk_serial("[   \033[31m**\033[0m   ] %s", str);
 	}
 }
 #endif
@@ -45,8 +44,7 @@ void print_succ(const char *str)
 	if(klog_to_serial == 0) {
 		printk("[   \033[32mOK\033[0m   ] %s" ,str);
 	} else {
-		write_serial_string("[    \033[32mOK\033[0m    ] ");
-		write_serial_string(str);
+		printk_serial("[   \033[32mOK\033[0m   ] %s", str);
 	}
 }
 #endif
@@ -58,7 +56,7 @@ void print_warn(const char *str)
 	if(klog_to_serial == 0) {
 		printk("[  \033[33mWARN\033[0m  ] %s", str);
 	} else {
-		write_serial_string("[   \033[33mWARN\033[0m   ] ");
+		write_serial_string("[  \033[33mWARN\033[0m  ] ");
 		write_serial_string(str);
 	}
 }
@@ -71,7 +69,7 @@ void print_erro(const char *str)
 	if (klog_to_serial == 0) {
 		printk("[  \033[31mERRO\033[0m  ] %s", str);
 	} else {
-		printk_serial("[   \033[31mERRO\033[0m   ] %s", str);
+		printk_serial("[  \033[31mERRO\033[0m  ] %s", str);
 	}
 }
 #endif
@@ -96,6 +94,12 @@ void print_time(const char *str)
 	} else {
 		printk_serial("[%02d:%02d:%02d] %s",get_hour_hex(),get_min_hex(),get_sec_hex(),str);
 	}
+}
+
+/* 获取内核日志的输出位置(1=serial,0 & other = other) */
+int get_klog_to_status()
+{
+	return klog_to_serial;
 }
 
 /* 内核打印字符 */

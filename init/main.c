@@ -59,16 +59,18 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 		panic(P001);
 	}
 
+	klog_to(0);
 	print_succ("");
 	printlog_serial("AstrConter-Kernel "KERNL_VERS" %s (build-%d) Powered by Uinxed-kernel -- of Viudira\n",OS_INFO_ ,KERNL_BUID);
+	init_cmdline(glb_mboot_ptr);
+	if(strcmp(find_cmdargs("kernel-log",get_cmdline(), get_cmdline_count()), "serial") == 0) klog_to(1);
 	print_succ("");
 	printlog_serial("KernelArea: 0x00000000 - 0x%08X | GraphicsBuffer: 0x%08X\n", program_break_end,
                                                                     	 glb_mboot_ptr->framebuffer_addr);
-	init_cmdline(glb_mboot_ptr);
+	
 	if(find_cmdline_args("klogo=on", get_cmdline(), get_cmdline_count()) == 0) {
 		bmp_analysis((Bmp *)klogo, vbe_get_width() - 200, 0, 1);
 	}
-	if(strcmp(find_cmdargs("kernel-log",get_cmdline(), get_cmdline_count()), "serial") == 0) klog_to(1);
 	char *vdr, *mdn;
 	int pbs, vbs; 
 	get_cpu_info(&vdr, &mdn, &pbs, &vbs);
