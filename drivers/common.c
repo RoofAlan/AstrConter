@@ -144,5 +144,5 @@ void disable_intr(void)
 void krn_halt(void)
 {
 	disable_intr();
-	while(1) {asm("hlt");}
+	while(1) {__asm__("hlt");}
 }

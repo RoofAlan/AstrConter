@@ -1,44 +1,60 @@
-C_SOURCES		= $(shell find . -name "*.c")
-C_OBJECTS		= $(patsubst %.c, %.o, $(C_SOURCES))
-S_SOURCES		= $(shell find . -name "*.s")
-S_OBJECTS		= $(patsubst %.s, %.o, $(S_SOURCES))
+ifeq ($(VERBOSE), 1)
+  V=
+  Q=
+else
+  V=@printf "[Build] $@ ...\n";
+  Q=@
+endif
 
-INFO = $(shell whoami)@$(shell hostname)
+BUILDDIR		?= build
 
-OTHER_OBJECTS	= ./lib/libos_terminal.a ./lib/pl_readline.lib ./lib/libelf_parse.lib ./lib/klogo.lib
+C_SOURCES		:= $(shell find * -name "*.c")
+S_SOURCES		:= $(shell find * -name "*.s")
+OBJS			:= $(C_SOURCES:%.c=$(BUILDDIR)/%.o) $(S_SOURCES:%.s=$(BUILDDIR)/%.o)
+DEPS			:= $(OBJS:%.o=%.d)
+LIBS			:= $(wildcard lib/lib*.a)
 
 CC				= gcc
 LD				= ld
 ASM				= nasm
 RM				= rm
 QEMU			= qemu-system-x86_64
+QEMU_FLAGS		= -serial stdio -audiodev none,id=speaker -machine pcspk-audiodev=speaker -m 1G
 
-C_FLAGS			= -Wall -Werror -Wcast-align -Winline -Wwrite-strings \
+C_FLAGS			= -MMD -Wall -Werror -Wcast-align -Winline -Wwrite-strings \
                   -c -I include -m32 -O3 -g -DNDEBUG -nostdinc -fno-pic \
-                  -fno-builtin -fno-stack-protector -D OS_INFO_=\"$(INFO)\" \
-				  -mno-mmx -mno-sse -mno-sse2
+				  -mno-mmx -mno-sse -mno-sse2 \
+                  -fno-builtin -fno-stack-protector -DOS_INFO_=\"$(shell whoami)@$(shell hostname)\"
 
 LD_FLAGS		= -T scripts/kernel.ld -m elf_i386 --strip-all
 ASM_FLAGS		= -f elf -g -F stabs
 
-all: link grub_iso
+all: AstrConter.iso
 
-.c.o:
-	@printf "  CC\t$@\n"
-	@$(CC) $(C_FLAGS) $< -o $@
+.PHONY: info
+info:
+	@printf "AstrConter Compile\n"
+makedirs:
+	$(Q)mkdir -p $(dir $(OBJS))
 
-.s.o:
-	@printf "  ASM\t$<\n"
-	@$(ASM) $(ASM_FLAGS) $<
+$(BUILDDIR)/%.o: %.c | makedirs
+	$(Q)printf "  CC\t\t$@\n"
+	$(Q)$(CC) $(C_FLAGS) -o $@ $<
 
-link:$(S_OBJECTS) $(C_OBJECTS)
-	@printf "  LD\tastrknl\n"
-	@$(LD) $(LD_FLAGS) $(S_OBJECTS) $(C_OBJECTS) $(OTHER_OBJECTS) -o astrknl
+$(BUILDDIR)/%.o: %.s | makedirs
+	$(Q)printf "  ASM\t\t$@\n"
+	$(Q)$(ASM) $(ASM_FLAGS) -o $@ $<
 
-.PHONY:grub
-grub_iso:astrknl
+astrknl: $(OBJS) $(LIBS)
+	$(Q)printf "  LD\t\t$@\n"
+	$(Q)$(LD) $(LD_FLAGS) -o $@ $^
+
+.PHONY: grub_iso
+grub_iso: AstrConter.iso
+
+AstrConter.iso: astrknl
 	@echo
-	@echo Packing ISO file...
+	@printf "Packing ISO file...\n"
 	@mkdir -p iso/boot/grub
 	@cp $< iso/boot/
 
@@ -46,30 +62,34 @@ grub_iso:astrknl
 	@echo 'set default=0' >> iso/boot/grub/grub.cfg
 
 	@echo 'menuentry "AstrConter"{' >> iso/boot/grub/grub.cfg
-	@echo '	multiboot /boot/astrknl dbg-shell=on tty=1 klogo=on' >> iso/boot/grub/grub.cfg
+	@echo '	multiboot /boot/astrknl klogo=on dbg-shell=on tty=1' >> iso/boot/grub/grub.cfg
 	@echo '	boot' >> iso/boot/grub/grub.cfg
 	@echo '}' >> iso/boot/grub/grub.cfg
 
 	@grub-mkrescue --locales="" --output=AstrConter.iso iso
 	@rm -rf iso
-	@echo Compilation complete.
+	@printf " Compilation complete.\n"
 
-.PHONY:clean
+.PHONY: clean
 clean:
-	$(RM) -f $(S_OBJECTS) $(C_OBJECTS) astrknl AstrConter.iso
+	$(Q)$(RM) -f $(OBJS) $(DEPS) astrknl AstrConter.iso
 
-.PHONY:qemu_iso
-run:
-	$(QEMU) -cdrom AstrConter.iso -serial stdio -m 1G
+.PHONY: run
+run: AstrConter.iso
+	$(QEMU) $(QEMU_FLAGS) -cdrom AstrConter.iso
 
-.PHONY:qemu_iso_debug
-run_db:
-	$(QEMU) -cdrom AstrConter.iso -serial stdio -d in_asm -m 1G
+.PHONY: run_db
+run_db: AstrConter.iso
+	$(QEMU) $(QEMU_FLAGS) -cdrom AstrConter.iso -d in_asm
 
-.PHONY:qemu_kernel
-runk:
-	$(QEMU) -kernel astrknl -serial stdio -m 1G
+.PHONY: runk
+runk: astrknl
+	$(QEMU) $(QEMU_FLAGS) -kernel astrknl
 
-.PHONY:qemu_kernel_debug
-runk_db:
-	$(QEMU) -kernel astrknl -serial stdio -d in_asm -m  1G
+.PHONY: runk_db
+runk_db: astrknl
+	$(QEMU) $(QEMU_FLAGS) -kernel astrknl -d in_asm
+
+.PRECIOUS: $(OBJS)
+
+-include $(DEPS)
