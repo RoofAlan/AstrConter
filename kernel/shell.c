@@ -387,7 +387,7 @@ void shell(const char *cmdline)
 	while (1) {
 		while(cmd[0] == 0) {
 			memset(cmd, 0, MAX_COMMAND_LEN);					// 清空上轮输入
-			sprintf(prompt, "\033[36muser@localhost: \033[34m%s\033[0m # ", vfs_node_to_path(working_dir));
+			sprintf(prompt, "\033[32muser@localhost: \033[34m%s\033[0m # ", vfs_node_to_path(working_dir));
 			pl_readline(pl, prompt, (char *)cmd, MAX_COMMAND_LEN);
 		}
 
