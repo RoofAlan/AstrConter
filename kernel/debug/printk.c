@@ -20,15 +20,17 @@
 #include "serial.h"
 #include "acpi.h"
 #include "cmos.h"
+#include "memory.h"
 
 int klog_to_serial;
+int loglevel = 4;
 
 /* 打印带有”[ ** ]“的字符串 */
 #ifndef print_busy
 void print_busy(const char *str)
 {
 	//print_succ(str);
-	if (klog_to_serial==0) {
+	if (klog_to_serial==0 && loglevel >= 4) {
 		printk("[   \033[31m**\033[0m   ]  %s", str);
 	} else {
 		printk_serial("[   \033[31m**\033[0m   ] %s", str);
@@ -41,7 +43,7 @@ void print_busy(const char *str)
 void print_succ(const char *str)
 {
 	//uint32_t osu = nano_time();
-	if(klog_to_serial == 0) {
+	if(loglevel >= 4) {
 		printk("[   \033[32mOK\033[0m   ] %s" ,str);
 	} else {
 		printk_serial("[   \033[32mOK\033[0m   ] %s", str);
@@ -53,7 +55,7 @@ void print_succ(const char *str)
 /* 打印带有”[ WARN ]“的字符串 */
 void print_warn(const char *str)
 {
-	if(klog_to_serial == 0) {
+	if(loglevel >= 3) {
 		printk("[  \033[33mWARN\033[0m  ] %s", str);
 	} else {
 		write_serial_string("[  \033[33mWARN\033[0m  ] ");
@@ -66,7 +68,7 @@ void print_warn(const char *str)
 /* 打印带有”[ ERRO ]“的字符串 */
 void print_erro(const char *str)
 {
-	if (klog_to_serial == 0) {
+	if (loglevel >= 2) {
 		printk("[  \033[31mERRO\033[0m  ] %s", str);
 	} else {
 		printk_serial("[  \033[31mERRO\033[0m  ] %s", str);
@@ -85,8 +87,8 @@ void klog_to(int serial) {
 
 /* 打印带有[HH:MM:SS]的字符串*/
 void print_time(const char *str)
-{       
-	if(klog_to_serial == 0) {
+{
+	if(loglevel >= 1) {
 		printk("[");
 		printk("%02d:%02d:%02d", get_hour_hex(), get_min_hex(), get_sec_hex());
     	printk("] ");
@@ -96,11 +98,6 @@ void print_time(const char *str)
 	}
 }
 
-/* 获取内核日志的输出位置(1=serial,0 & other = other) */
-int get_klog_to_status()
-{
-	return klog_to_serial;
-}
 
 /* 内核打印字符 */
 void putchar(char ch)
@@ -108,8 +105,94 @@ void putchar(char ch)
 	tty_print_logch(ch);
 }
 
+/* 设置内核日志等级 */
+void set_loglevel(int level)
+{
+	if(level <= 3) {
+		loglevel = level;
+	} else {
+		loglevel = 3;
+	}
+}
+
+static size_t u8strlen(uint8_t *str)
+{
+	size_t length = 0;
+	while (str[length] != '\0') {
+		length++;
+	}
+	return length;
+}
+
+static int arg_parse(uint8_t *arg_str, uint8_t **argv, uint8_t token)
+{
+	int arg_idx = 0;
+
+	while (arg_idx < 32768) {
+		argv[arg_idx] = 0;
+		arg_idx++;
+	}
+	uint8_t *next = arg_str;
+	int argc = 0;
+
+	while (*next) {
+		while (*next == token) next++;
+		if (*next == 0) break;
+		argv[argc] = next;
+		while (*next && *next != token) next++;
+		if (*next) {
+			*next++ = 0;
+		}
+		if (argc > 32768) return 1;
+		argc++;
+	}
+	return argc;
+}
+
+/* 更具cmdline设置日志等级 */
+void set_loglevel_cmdline()
+{
+	uint8_t *arg_based;
+	arg_based = (unsigned char *)glb_mboot_ptr->cmdline;
+
+	int i = 0;
+	uint8_t bootarg[256] = {0};
+
+	while (arg_based[i] != '\0') {
+		bootarg[i] = arg_based[i];
+		i++;
+	}
+	uint8_t **bootargv = (uint8_t **)kmalloc(32768 * sizeof(uint8_t *));
+	if (!bootargv) {
+		set_loglevel(1);
+		return;
+	}
+
+	int argc = arg_parse(bootarg, bootargv, ' ');
+
+	for (int j = 0; j < argc; j++) {
+		if (strncmp((char *)bootargv[j], "loglevel=", 9) == 0) {
+			uint8_t *log_num_str = bootargv[j] + 9;
+			int tty_num_len = u8strlen(log_num_str);
+			if (tty_num_len == 1 || tty_num_len == 2) {
+				int log_num = atoi((char *)log_num_str);
+				kfree(bootargv);
+				if (log_num <=3) set_loglevel(log_num);
+			}
+		}
+	}
+	kfree(bootargv);
+	return;
+}
+
+/* 获取内核日志等级 */
+int get_loglevel()
+{
+	return loglevel;
+}
+
 /* 格式化打印日志 */
-void printlog_serial(const char *format, ...)
+void printlog_serial(int level, const char *format, ...)
 {
 	/* 避免频繁创建临时变量，内核的栈很宝贵 */
 	static char buff[1024];
@@ -121,7 +204,7 @@ void printlog_serial(const char *format, ...)
 	va_end(args);
 
 	buff[i] = '\0';
-	if(klog_to_serial == 0) {
+	if(loglevel >= level) {
 		printk("%s",buff);
 	} else {
 		write_serial_string(buff);

@@ -11,17 +11,32 @@
 
 #include "vargs.h"
 
+#define INFO_LEVEL 4
+#define WARN_LEVEL 3
+#define ERRO_LEVEL 2
+#define PANIC_LEVEL 1
+#define DONT_SHOW_LEVEL 0
+
 /* 内核打印字符 */
 void putchar(char ch);
 
 /* 内核打印字符串 */
 void printk(const char *format, ...);
 
+/* 设置内核日志等级 */
+void set_loglevel(int level);
+
+/* 获取内核日志等级 */
+int get_loglevel();
+
+/* 更具cmdline设置日志等级 */
+void set_loglevel_cmdline();
+
 /* 获取内核日志的输出位置(1=serial,0 & other = other) */
 int get_klog_to_status();
 
 /* 格式化打印日志 */
-void printlog_serial(const char *format, ...);
+void printlog_serial(int level, const char *format, ...);
 
 /* 格式化打印到串口 */
 void printk_serial(const char *format, ...);

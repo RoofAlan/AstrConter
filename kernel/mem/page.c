@@ -307,5 +307,5 @@ void init_page(multiboot_t *multiboot)
 	switch_page_directory(kernel_directory);
 	open_page();
 	print_succ("Memory: paging init done, total: ");
-	printlog_serial("%dMiB\n", (glb_mboot_ptr->mem_upper + glb_mboot_ptr->mem_lower) / 1024 + 1);
+	printlog_serial(INFO_LEVEL,"%dMiB\n", (glb_mboot_ptr->mem_upper + glb_mboot_ptr->mem_lower) / 1024 + 1);
 }

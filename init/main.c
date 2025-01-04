@@ -32,6 +32,7 @@
 #include "tty.h"
 #include "bochs.h"
 #include "cmdline.h"
+#include "stdlib.h"
 
 void shell(const char *); // 声明shell程序入口
 
@@ -60,12 +61,13 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	}
 
 	klog_to(0);
+	set_loglevel_cmdline();
 	print_succ("");
-	printlog_serial("AstrConter-Kernel "KERNL_VERS" %s (build-%d) Powered by Uinxed-kernel -- of Viudira\n",OS_INFO_ ,KERNL_BUID);
+	printlog_serial(INFO_LEVEL,"AstrConter-Kernel "KERNL_VERS" %s (build-%d) Powered by Uinxed-kernel -- of Viudira\n",OS_INFO_ ,KERNL_BUID);
 	init_cmdline(glb_mboot_ptr);
 	if(strcmp(find_cmdargs("kernel-log",get_cmdline(), get_cmdline_count()), "serial") == 0) klog_to(1);
 	print_succ("");
-	printlog_serial("KernelArea: 0x00000000 - 0x%08X | GraphicsBuffer: 0x%08X\n", program_break_end,
+	printlog_serial(INFO_LEVEL,"KernelArea: 0x00000000 - 0x%08X | GraphicsBuffer: 0x%08X\n", program_break_end,
                                                                     	 glb_mboot_ptr->framebuffer_addr);
 	
 	if(find_cmdline_args("klogo=on", get_cmdline(), get_cmdline_count()) == 0) {
@@ -75,9 +77,9 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	int pbs, vbs; 
 	get_cpu_info(&vdr, &mdn, &pbs, &vbs);
 	print_succ("");
-	printlog_serial("CPU name: %s | Vendor: %s\n", mdn, vdr);
+	printlog_serial(INFO_LEVEL,"CPU name: %s | Vendor: %s\n", mdn, vdr);
 	print_succ("");
-	printlog_serial("CPU cache: %d | Virtual Address 0x%x\n", pbs, vbs);
+	printlog_serial(INFO_LEVEL,"CPU cache: %d | Virtual Address 0x%x\n", pbs, vbs);
 
 	init_gdt();
 	init_idt();
@@ -128,7 +130,7 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	
 	enable_scheduler();
 	print_succ("");
-	printlog_serial("AstrCounter On tty%d\n", get_boot_tty());
+	printlog_serial(INFO_LEVEL,"AstrCounter On tty%d\n", get_boot_tty());
 	if(find_cmdline_args("dbg-shell=on",get_cmdline(), get_cmdline_count()) == 0) {
 		kernel_thread(kthread_shell, (void *)((glb_mboot_ptr->flags&MULTIBOOT_INFO_CMDLINE)?glb_mboot_ptr->cmdline:0), "Shell", USER_TASK);
 	} else {
