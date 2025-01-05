@@ -79,6 +79,7 @@ void set_loglevel(int level)
 	}
 }
 
+// -----------[CUT]----------
 static size_t u8strlen(uint8_t *str)
 {
 	size_t length = 0;
@@ -87,7 +88,6 @@ static size_t u8strlen(uint8_t *str)
 	}
 	return length;
 }
-
 static int arg_parse(uint8_t *arg_str, uint8_t **argv, uint8_t token)
 {
 	int arg_idx = 0;
@@ -112,6 +112,7 @@ static int arg_parse(uint8_t *arg_str, uint8_t **argv, uint8_t token)
 	}
 	return argc;
 }
+// ---------------[CUT]--------------
 
 /* 更具cmdline设置日志等级 */
 void set_loglevel_cmdline()

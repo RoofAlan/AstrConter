@@ -80,7 +80,6 @@ void shell_help(void)
            "| reboot    | Reboot the system.                    |\n"
            "| cd        | Change the working directory.         |\n"
            "| ls        | Lists the current directory files.    |\n"
-           "| free      | Displays the memory status.           |\n"
            "| cetsl     | Enable/Disable serial console output. |\n"
            "+-----------+---------------------------------------+\n");
 	printk("+----------------------------------+----------------------------------+\n"
