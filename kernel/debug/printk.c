@@ -28,12 +28,7 @@ int loglevel = 4;
 #ifndef print_busy
 void print_busy(const char *str)
 {
-	//print_succ(str);
-	if (loglevel >= 4) {
-		printk("[   \033[31m**\033[0m   ]  %s", str);
-	} else {
-		printk_serial("[   \033[31m**\033[0m   ] %s", str);
-	}
+	printlog_serial(INFO_LEVEL,"[   \033[31m**\033[0m   ] %s", str);
 }
 #endif
 
@@ -41,12 +36,7 @@ void print_busy(const char *str)
 /* 打印带有”[ OK ]“的字符串 */
 void print_succ(const char *str)
 {
-	//uint32_t osu = nano_time();
-	if(loglevel >= 4) {
-		printk("[   \033[32mOK\033[0m   ] %s" ,str);
-	} else {
-		printk_serial("[   \033[32mOK\033[0m   ] %s", str);
-	}
+	printlog_serial(INFO_LEVEL,"[   \033[32mOK\033[0m   ] %s", str);
 }
 #endif
 
@@ -54,12 +44,7 @@ void print_succ(const char *str)
 /* 打印带有”[ WARN ]“的字符串 */
 void print_warn(const char *str)
 {
-	if(loglevel >= 3) {
-		printk("[  \033[33mWARN\033[0m  ] %s", str);
-	} else {
-		write_serial_string("[  \033[33mWARN\033[0m  ] ");
-		write_serial_string(str);
-	}
+	printlog_serial(WARN_LEVEL,"[  \033[33mWARN\033[0m  ] %s", str);
 }
 #endif
 
@@ -67,25 +52,14 @@ void print_warn(const char *str)
 /* 打印带有”[ ERRO ]“的字符串 */
 void print_erro(const char *str)
 {
-	if (loglevel >= 2) {
-		printk("[  \033[31mERRO\033[0m  ] %s", str);
-	} else {
-		printk_serial("[  \033[31mERRO\033[0m  ] %s", str);
-	}
+	printlog_serial(ERRO_LEVEL,"[  \033[31mERRO\033[0m  ] %s", str);
 }
 #endif
 
 /* 打印带有[HH:MM:SS]的字符串*/
 void print_time(const char *str)
 {
-	if(loglevel >= 1) {
-		printk("[");
-		printk("%02d:%02d:%02d", get_hour_hex(), get_min_hex(), get_sec_hex());
-    	printk("] ");
-    	printk("%s", str);
-	} else {
-		printk_serial("[%02d:%02d:%02d] %s",get_hour_hex(),get_min_hex(),get_sec_hex(),str);
-	}
+	printlog_serial(PANIC_LEVEL,"[%02d:%02d:%02d] %s",get_hour_hex(),get_min_hex(),get_sec_hex(),str);
 }
 
 
@@ -200,7 +174,7 @@ void printlog_serial(int level, const char *format, ...)
 	buff[i] = '\0';
 	if(loglevel >= level) {
 		printk("%s",buff);
-	} else {
+	} else if (loglevel == 0) {
 		write_serial_string(buff);
 	}
 }

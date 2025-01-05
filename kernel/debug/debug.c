@@ -64,7 +64,7 @@ void panic(const char *format, ...)
 	buff[i] = '\0';
 
 	//printk("[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---", buff); 
-	printk_serial("[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---", buff);
+	printlog_serial(PANIC_LEVEL,"[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---", buff);
 	krn_halt();
 }
 
