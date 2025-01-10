@@ -126,7 +126,17 @@ char *strchr(char *str, int c)
 			return str;
 		}
 	}
-	return NULL;
+	return 0;
+}
+
+/* 查找字符串中的一个字符并返回该字符在字符串中第一次出现的位置，找不到返回空指针 */
+char *strchrnul(const char* s, int c)
+{
+	char* p = (char*)s;
+	while (*p && *p != (char)c) {
+		p++;
+	}
+	return p;
 }
 
 /* 返回字符串src的长度 */
@@ -196,7 +206,7 @@ void *strdup(const char *s)
 {
 	size_t len = strlen(s) + 1;
 	void *p = (void *)kmalloc(len);
-	if (p != NULL) memcpy(p, (uint8_t *)s, len);
+	if (p != 0) memcpy(p, (uint8_t *)s, len);
 	return p;
 }
 

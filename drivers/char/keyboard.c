@@ -62,9 +62,7 @@ static void set_leds(void)
 void getch(char *ch)
 {
 	while (fifo_status(&terminal_key) == 0) {
-		enable_intr();
 		__asm__("hlt");
-		disable_intr();
 	}
 	*ch = fifo_get(&terminal_key);
 }
@@ -81,6 +79,6 @@ void init_keyboard(void)
 	scroll_lock = 0;
 
 	set_leds();
-	register_interrupt_handler(IRQ1, &keyboard_handler);
+	register_interrupt_handler(0x21, &keyboard_handler);
 	print_succ("PS/2 keyboard controller initialized successfully.\n");
 }

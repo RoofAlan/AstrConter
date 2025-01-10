@@ -303,7 +303,7 @@ void init_page(multiboot_t *multiboot)
 		alloc_frame_line(get_page(j,1,kernel_directory),j,0,1);
 		j += 0x1000;
 	}
-	register_interrupt_handler(14, page_fault);
+	register_interrupt_handler(0xe, &page_fault);
 	switch_page_directory(kernel_directory);
 	open_page();
 	print_succ("Memory: paging init done, total: ");

@@ -31,7 +31,7 @@ int can_sche = 0;
 /* 初始化任务调度 */
 void init_sched(void)
 {
-	print_busy("SCHED: Initializing multi-task...\r");
+	print_busy("Initializing multi-task...\r");
 
 	/* 为当前执行流创建信息结构体 该结构位于当前执行流的栈最低端 */
 	current = kmalloc(sizeof(struct task_struct));
@@ -42,11 +42,13 @@ void init_sched(void)
 	current->stack = current;			// 该成员指向栈低地址
 	current->pgd_dir = kernel_directory;
 	current->mem_size = 0;
-	current->name = "astrknl";	// 内核进程名称
+	current->name = "Uinxed-Kernel";	// 内核进程名称
 	current->fpu_flag = 0;				// 还没使用FPU
 	current->cpu_clock = 0;
 	current->sche_time = 1;
 	current->context.esp = (uint32_t )current->stack;
+
+	for (int i = 0; i < 255; i++)current->file_table[i] = 0;
 
 	current->program_break = (uint32_t)program_break;
 	current->program_break_end = (uint32_t)program_break_end;
@@ -55,7 +57,7 @@ void init_sched(void)
 	current->next = current;
 
 	running_proc_head = current;
-	print_succ("SCHED: Multi-task initialized.   \n");
+	print_succ("Multi-task initialized.       \n");
 }
 
 /* 允许进程调度 */
@@ -75,7 +77,7 @@ void schedule(pt_regs *regs)
 {
 	disable_intr();
 	if (current && can_sche) {
-		if(current->state != TASK_RUNNABLE) {
+		if (current->state != TASK_RUNNABLE) {
 			current = running_proc_head;
 		}
 		current->cpu_clock++;
@@ -94,16 +96,18 @@ void change_task_to(struct task_struct *next, pt_regs *regs)
 	if (current != next) {
 		if (next == NULL) next = running_proc_head;
 		current->sche_time = 1;
+		uint32_t cr0 = get_cr0();
+		if (!(cr0 & (1 << 3))) {
+			/* CR0.TS 为零，说明进程用过FPU了，需要保存 */
+			__asm__ ("fnsave %0" : : "m"(current->context.fpu_regs) : "memory");
+
+			/* 设置CR0.TS FPU操作将产生#NM */
+			set_cr0(cr0 | (1 << 3));
+		}
 		struct task_struct *prev = current;
 		current = next;
 		switch_page_directory(current->pgd_dir);
 		set_kernel_stack((uintptr_t)current->stack + STACK_SIZE);
-		set_cr0(get_cr0() & ~((1 << 2) | (1 << 3)));
-		if (current->fpu_flag) {
-			__asm__ __volatile__("fnsave (%%eax) \n" ::"a"(&(current->context.fpu_regs)) : "memory");
-		}
-		set_cr0(get_cr0() | (1 << 2) | (1 << 3));
-
 		prev->context.eip = regs->eip;
 		prev->context.ds = regs->ds;
 		prev->context.cs = regs->cs;

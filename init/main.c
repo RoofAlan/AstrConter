@@ -35,6 +35,7 @@
 #include "parallel.h"
 #include "fdc.h"
 #include "ide.h"
+#include "iso9660.h"
 
 void shell(const char *); // 声明shell程序入口
 
@@ -107,6 +108,7 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	vfs_init();
 	devfs_regist();
 	fatfs_regist();
+	iso9660_regist();
 	file_init();
 	if (vfs_do_search(vfs_open("/dev"), "hda")) {
 		vfs_mount("/dev/hda", vfs_open("/"));
