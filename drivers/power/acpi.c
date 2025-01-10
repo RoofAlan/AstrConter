@@ -55,7 +55,6 @@ int acpi_sys_init(void)
 	uint32_t entrys;
 
 	rsdt = (acpi_rsdt_t *) AcpiGetRSDPtr();
-	page_line(rsdt);
 	if (!rsdt || acpi_check_header(rsdt, (uint8_t*)"RSDT") < 0) {
 		print_warn("Unable to find Advanced Configuration and Power Interface.\n");
 		return 0;
@@ -63,7 +62,6 @@ int acpi_sys_init(void)
 	entrys = rsdt->length - HEADER_SIZE / 4;
 	p = &(rsdt->entry);
 	while (entrys--) {
-		page_line(*p);
 		if (!acpi_check_header(*p, (uint8_t*)"FACP")) {
 			facp = (acpi_facp_t *) *p;
 
@@ -85,7 +83,6 @@ int acpi_sys_init(void)
 
 			uint8_t * S5Addr;
 			uint32_t dsdtlen;
-			page_line(facp->DSDT);
 
 			if (!acpi_check_header(facp->DSDT, (uint8_t*)"DSDT")) {
 				S5Addr = &(facp->DSDT->definition_block);
@@ -194,7 +191,6 @@ void hpet_initialize(void)
 {
 	HPET *hpet = (HPET *)(unsigned long)acpi_find_table("HPET");
 	hpetInfo = (HpetInfo *) hpet->hpetAddress.address;
-	page_line(hpetInfo);
 	uint32_t counterClockPeriod = hpetInfo->generalCapabilities >> 32;
 	hpetPeriod = counterClockPeriod / 1000000;
 	hpetInfo->generalConfiguration |= 1;
