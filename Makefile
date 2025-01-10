@@ -32,9 +32,6 @@ ASM_FLAGS		= -f elf -g -F stabs
 
 all: AstrConter.iso
 
-.PHONY: info
-info:
-	@printf "AstrConter Compile\n"
 makedirs:
 	$(Q)mkdir -p $(dir $(OBJS))
 
