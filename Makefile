@@ -19,7 +19,7 @@ LD				= ld
 ASM				= nasm
 RM				= rm
 QEMU			= qemu-system-x86_64
-QEMU_FLAGS		= -serial stdio -audiodev none,id=speaker -machine pcspk-audiodev=speaker -m 1G
+QEMU_FLAGS		= -serial stdio -audiodev pa,id=speaker -machine pcspk-audiodev=speaker -m 1G
 KERNEL_APPEND = console=tty0 klogo=on dbg-shell=on loglevel=4
 
 C_FLAGS			= -MMD -Wall -Werror -Wcast-align -Winline -Wwrite-strings \

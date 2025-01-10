@@ -12,6 +12,19 @@
 #include "serial.h"
 #include "common.h"
 #include "printk.h"
+#include "vdisk.h"
+
+/* 传递给vdisk的读接口 */
+static void vdisk_ttyS0_read(int drive, uint8_t *buffer, uint32_t number, uint32_t lba)
+{
+	*buffer = read_serial();
+}
+
+/* 传递给vdisk的写接口 */
+static void vdisk_ttyS0_write(int drive, uint8_t *buffer, uint32_t number, uint32_t lba)
+{
+	write_serial_string((const char *)buffer);
+}
 
 /* 初始化串口 */
 void init_serial(int baud_rate)
@@ -31,14 +44,26 @@ void init_serial(int baud_rate)
 
 	/* 检查串口是否有问题（即：与发送的字节不一样） */
 	if (inb(SERIAL_PORT + 0) != 0xAE) {
-		print_erro("RS-232 controller data is abnormal.\n");
+		print_warn("RS-232 controller data is abnormal.\n");
+		return;
 	}
 
 	/* 如果串口没有故障，将其设置为正常运行模式 */
 	/* (非环回，启用IRQ，启用OUT#1和OUT#2位) */
 	outb(SERIAL_PORT + 4, 0x0F);
+
+	/* 注册到vdisk */
+	vdisk vd;
+	vd.flag = 1;
+	vd.Read = vdisk_ttyS0_read;
+	vd.Write = vdisk_ttyS0_write;
+	vd.sector_size = 1;
+	vd.size = 1;
+	sprintf(vd.DriveName,"ttyS0");
+	register_vdisk(vd);
+
 	print_succ("The RS-232 controller initialized successfully | Port: COM1 |");
-	printlog_serial(INFO_LEVEL," Baud rate: %d\n", baud_rate);
+	printlog_serial(INFO_LEVEL, " Baud rate: %d\n", baud_rate);
 }
 
 /* 检测串口读是否就绪 */

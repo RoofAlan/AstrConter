@@ -164,7 +164,7 @@ int get_loglevel()
 void printlog_serial(int level, const char *format, ...)
 {
 	/* 避免频繁创建临时变量，内核的栈很宝贵 */
-	static char buff[1024];
+	static char buff[2048];
 	va_list args;
 	int i;
 
@@ -184,7 +184,7 @@ void printlog_serial(int level, const char *format, ...)
 void printk_serial(const char *format, ...)
 {
 	/* 避免频繁创建临时变量，内核的栈很宝贵 */
-	static char buff[1024];
+	static char buff[2048];
 	va_list args;
 	int i;
 
@@ -201,7 +201,7 @@ void printk_serial(const char *format, ...)
 void printk(const char *format, ...)
 {
 	/* 避免频繁创建临时变量，内核的栈很宝贵 */
-	static char buff[1024];
+	static char buff[2048];
 	va_list args;
 	int i;
 

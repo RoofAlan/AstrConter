@@ -30,6 +30,7 @@
 #include "bmp.h"
 #include "klogo.lib.h"
 #include "mouse.h"
+#include "serial.h"
 
 #define MAX_COMMAND_LEN	100
 #define MAX_ARG_NR		30

@@ -8,7 +8,6 @@
 #include "astrknl.h"
 #include "pci.h"
 #include "serial.h"
-#include "block.h"
 #include "timer.h"
 #include "beep.h"
 #include "cpu.h"
@@ -33,6 +32,9 @@
 #include "bochs.h"
 #include "cmdline.h"
 #include "stdlib.h"
+#include "parallel.h"
+#include "fdc.h"
+#include "ide.h"
 
 void shell(const char *); // 声明shell程序入口
 
@@ -93,19 +95,22 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	init_fpu();
 	init_pci();
 	init_serial(9600);
+	init_parallel();
 	init_keyboard();
+	init_tty();
 	mouse_init();
 	init_sched();
 	syscall_init();
-	block_init();
+	floppy_init();
+	init_ide();
 	
 	vfs_init();
 	devfs_regist();
 	fatfs_regist();
 	file_init();
-	if (vfs_do_search(vfs_open("/dev"), "sda")) {
-		vfs_mount("/dev/sda", vfs_open("/"));
-		print_succ("Root filesystem mounted ('/dev/sda' -> '/')\n");
+	if (vfs_do_search(vfs_open("/dev"), "hda")) {
+		vfs_mount("/dev/hda", vfs_open("/"));
+		print_succ("Root filesystem mounted ('/dev/hda' -> '/')\n");
 	} else {
 		if(strcmp(find_cmdargs("dbg-shell",get_cmdline(), get_cmdline_count()), "on") == 0) {
 			print_warn("The root file system could not be mounted.\n");
