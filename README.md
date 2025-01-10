@@ -2,7 +2,7 @@
 
 ![](https://img.shields.io/badge/License-GPLv3-blue) ![](https://img.shields.io/badge/Language-3-orange) ![](https://img.shields.io/badge/hardware-x86-green) ![](https://img.shields.io/badge/firmware-BIOS-yellow)
 
-![](https://github.com/RoofAlan/roofalan.github.io/ASO-Studio.png)
+![](https://github.com/RoofAlan/roofalan.github.io/blob/main/ASO-Studio.png)
 
 ## 简介
 这是一个基于Uinxed-Kernel的开源内核，因原项目为GPL-3.0协议，所以该项目也会基于GPL-3.0 协议开源 
