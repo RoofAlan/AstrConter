@@ -71,7 +71,7 @@ void shell_help(void)
            "| clear     | Clear the screen.                     |\n"
            "| cpuid     | List for CPU information.             |\n"
            "| lspci     | List for All the PCI device.          |\n"
-           "| proc      | List for all task processes.          |\n"
+           "| stask     | List for all task processes.          |\n"
            "| hltst     | Test the Kernel-Panic.                |\n"
            "| taskkill  | Kill task which is running.           |\n"
            "| uname     | Show unix name.                       |\n"
@@ -81,6 +81,8 @@ void shell_help(void)
            "| reboot    | Reboot the system.                    |\n"
            "| cd        | Change the working directory.         |\n"
            "| ls        | Lists the current directory files.    |\n"
+		   "| slogo     | Show the kernel logo                  |\n"
+		   "| free      | Display the memory status             |\n"
            "| cetsl     | Enable/Disable serial console output. |\n"
            "+-----------+---------------------------------------+\n");
 	printk("+----------------------------------+----------------------------------+\n"
@@ -93,17 +95,12 @@ void shell_help(void)
 	return;
 }
 
-int32_t load_elf_file(char *path) {
-	vfs_node_t elf_file = vfs_open(path);
-	if (elf_file == 0) return -1;
-	uint8_t *data = kmalloc(elf_file->size);
-	if (vfs_read(elf_file, data, 0, elf_file->size) == -1) {
-		vfs_close(elf_file);
-		return -1;
-	}
-	elf_load(elf_file->size, data);
-	kfree(data);
-	return 0;
+void shell_free(void)
+{
+	printk("       total    used     free\n");
+	printk("Mem:   %-9d%-9d%d\n", (glb_mboot_ptr->mem_upper + glb_mboot_ptr->mem_lower), (get_kernel_memory_usage() / 1024),
+                                  (glb_mboot_ptr->mem_upper + glb_mboot_ptr->mem_lower) - (get_kernel_memory_usage() / 1024));
+	return;
 }
 
 void shell_clear(void)
@@ -258,13 +255,6 @@ void shell_slogo(int argc, char *argv[])
 	bmp_analysis((Bmp *)klogo, vbe_get_width() / 2 - 150, 100, 0);
 }
 
-void shell_ms(int argc, char *argv[]) {
-	while(1) {
-		printk("X: %d Y: %d          \r", get_mouse_x(), get_mouse_y());
-		bmp_analysis((Bmp *)mlogo ,get_mouse_x(), get_mouse_y(), 0);
-	}
-}
-
 typedef struct builtin_cmd
 {
 	const char *name;
@@ -286,9 +276,9 @@ builtin_cmd_t builtin_cmds[] = {
 	{"reboot", (void (*)(int, char **))shell_reboot},
 	{"cd", (void (*)(int, char **))shell_cd},
 	{"ls", (void (*)(int, char **))shell_ls},
+	{"free",(void (*)(int, char **))shell_free},
 	{"cetsl", shell_cetsl},
 	{"slogo", shell_slogo},
-	{"ms", shell_ms}
 };
 
 /* 内建命令数量 */

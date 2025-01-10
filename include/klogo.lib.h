@@ -13,6 +13,5 @@
 #define INCLUDE_KLOGO_LIB_H_
 
 extern uint8_t klogo[];
-extern uint8_t mlogo[];
 
 #endif // INCLUDE_KLOGO_LIB_H_
