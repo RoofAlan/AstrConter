@@ -84,6 +84,10 @@ void shell_help(void)
 		   "| slogo     | Show the kernel logo                  |\n"
 		   "| free      | Display the memory status             |\n"
 		   "| cat       | Read the file                         |\n"
+		   "| mount     | Mount the device to a directory       |\n"
+		   "| umount    | Umount the device                     |\n"
+		   "| mkdir     | Create direcotory                     |\n"
+		   "| touch     | Create file                           |\n"
            "| cetsl     | Enable/Disable serial console output. |\n"
            "+-----------+---------------------------------------+\n");
 	printk("+----------------------------------+----------------------------------+\n"
@@ -279,6 +283,65 @@ void shell_slogo(int argc, char *argv[])
 	bmp_analysis((Bmp *)klogo, vbe_get_width() / 2 - 150, 100, 0);
 }
 
+void shell_mount(int argc, char *argv[])
+{
+	if(argv[1] == NULL || argv[2] == NULL) {
+		printk("Usage: %s <device> <path>\n", argv[0]);
+		return;
+	}
+	vfs_node_t path = vfs_open(argv[2]);
+	if (vfs_open(argv[1]) == NULL) {
+		printk("Failed to find device: %s\n", argv[1]);
+		return;
+	}
+	if(path == NULL) {
+		printk("Failed to open: %s\n",argv[2]);
+		return;
+	} else if(strcmp(argv[2], "/") == 0) {
+		printk("Waring: you are trying to mount a device to root ('%s' -> '/')\n", argv[1]);
+	}
+	if(vfs_mount(argv[1], path) != 0) {
+		printk("Failed to mount device: %s\n", argv[1]);
+		return;
+	}
+	return;
+}
+
+void shell_umount(int argc, char *argv[]) {
+	if(argc != 2) {
+		printk("Usage: %s <MountPoint>\n",argv[0]);
+		return;
+	}
+	if (vfs_umount(argv[1]) == -1) {
+		printk("Failed to umount: %s\n", argv[1]);
+		return;
+	}
+	return;
+}
+
+void shell_mkdir(int argc, char *argv[]) {
+	if(argc != 2) {
+		printk("Usage: %s <Name>\n",argv[0]);
+		return;
+	}
+	if(vfs_mkdir(argv[1]) == -1) {
+		printk("Failed to create directory: %s\n",argv[1]);
+		return;
+	}
+	return;
+}
+
+void shell_touch(int argc, char *argv[]) {
+	if(argc != 2) {
+		printk("Usage: %s <filename>\n",argv[0]);
+		return;
+	}
+	if(vfs_mkfile(argv[1]) == -1) {
+		printk("Failed to create file: %s\n", argv[1]);
+		return;
+	}
+	return;
+}
 typedef struct builtin_cmd
 {
 	const char *name;
@@ -303,7 +366,11 @@ builtin_cmd_t builtin_cmds[] = {
 	{"free",(void (*)(int, char **))shell_free},
 	{"cetsl", shell_cetsl},
 	{"slogo", shell_slogo},
-	{"cat", shell_cat}
+	{"cat", shell_cat},
+	{"mount", shell_mount},
+	{"umount", shell_umount},
+	{"mkdir", shell_mkdir},
+	{"touch", shell_touch}
 };
 
 /* 内建命令数量 */
