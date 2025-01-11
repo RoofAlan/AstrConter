@@ -71,7 +71,7 @@ AstrConter.iso: astrknl
 .PHONY: clean
 clean:
 	$(Q)$(RM) -f $(OBJS) $(DEPS) astrknl AstrConter.iso
-	$(Q)$(RM) -rf build/
+	$(Q)$(RM) -rf build/ .xmake
 
 .PHONY: run
 run: AstrConter.iso
