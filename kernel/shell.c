@@ -90,7 +90,7 @@ void shell_help(void)
 		   "| umount    | Umount the device                     |\n"
 		   "| mkdir     | Create direcotory                     |\n"
 		   "| touch     | Create file                           |\n"
-           "| cetsl     | Enable/Disable serial console output. |\n"
+           "| write     | Write something to a file/device      |\n"
            "+-----------+---------------------------------------+\n");
 	printk("+----------------------------------+----------------------------------+\n"
            "| OST Shortcut key                 | Instructions                     |\n"
@@ -266,20 +266,6 @@ void shell_ls(int argc, char *argv[])
 	return;
 }
 
-void shell_cetsl(int argc, char *argv[])
-{
-	if (strcmp(argv[1], "1") == 0 || strcmp(argv[1], "true") == 0) {
-		vbe_to_serial(1);
-		printk("The kernel console has been output to the serial port.\n");
-	} else if (strcmp(argv[1], "0") == 0 || strcmp(argv[1], "false") == 0) {
-		vbe_to_serial(0);
-		printk("Stopped outputting the kernel console to the serial port.\n");
-	} else {
-		printk("Usage: %s [BOOLEAN]\n", argv[0]);
-	}
-	return;
-}
-
 void shell_slogo(int argc, char *argv[])
 {
 	bmp_analysis((Bmp *)klogo, vbe_get_width() / 2 - 150, 100, 0);
@@ -352,6 +338,33 @@ void shell_touch(int argc, char *argv[]) {
 	}
 	return;
 }
+void shell_write(int argc, char *argv[]) {
+	if(argc < 3) {
+		printk("Usage: %s <file> <thing1> <thing2> <...>\n",argv[0]);
+		return;
+	}
+	vfs_node_t file = vfs_open(argv[1]);
+	if(file == NULL) {
+		printk("Error to open file\n");
+		return;
+	}
+	for(int i = 2; i < argc; i++) {
+		if(strcmp(argv[i], "\\n") != 0) {
+			if (vfs_write(file, argv[i], 0, file->size) == -1) {
+				printk("Failed to write\n");
+				break;
+			}
+		} else {
+			if (vfs_write(file, (void *)"\n", 0, file->size) == -1) {
+				printk("Failed to write\n");
+				break;
+			}
+		}
+		if(i != argc-1) vfs_write(file, (void *)" ", 0, file->size);
+	}
+	return;
+}
+
 typedef struct builtin_cmd
 {
 	const char *name;
@@ -374,13 +387,13 @@ builtin_cmd_t builtin_cmds[] = {
 	{"cd", (void (*)(int, char **))shell_cd},
 	{"ls", (void (*)(int, char **))shell_ls},
 	{"free",(void (*)(int, char **))shell_free},
-	{"cetsl", shell_cetsl},
 	{"slogo", shell_slogo},
 	{"cat", shell_cat},
 	{"mount", shell_mount},
 	{"umount", shell_umount},
 	{"mkdir", shell_mkdir},
-	{"touch", shell_touch}
+	{"touch", shell_touch},
+	{"write", shell_write}
 };
 
 /* 内建命令数量 */
