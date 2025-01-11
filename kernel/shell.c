@@ -422,10 +422,8 @@ void shell(const char *cmdline)
 		}
 
 		int cmd_index = find_cmd(argv[0]);
-		char bin_name[100];
-		char bin_path[100];
 		if (cmd_index < 0) {
-			sprintf(bin_name, "%s.AS", (const char *)argv[0]);
+			// sprintf(bin_name, "%s.AS", (const char *)argv[0]);
 			// if (vfs_do_search(vfs_open(vfs_node_to_path(working_dir)), bin_name)) {
 			// 	sprintf(bin_path, "%s/%s", working_dir->name, bin_name);
 			// 	elf_thread(bin_path, argv[1], bin_name, USER_TASK);
