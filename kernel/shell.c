@@ -35,6 +35,8 @@
 #define MAX_COMMAND_LEN	100
 #define MAX_ARG_NR		30
 
+static int root_status = 0;
+
 /* 解析命令行字符串 */
 static int cmd_parse(uint8_t *cmd_str, uint8_t **argv, uint8_t token) // 用uint8_t是因为" "使用8位整数
 {
@@ -298,11 +300,19 @@ void shell_mount(int argc, char *argv[])
 		printk("Failed to open: %s\n",argv[2]);
 		return;
 	} else if(strcmp(argv[2], "/") == 0) {
-		printk("Waring: you are trying to mount a device to root ('%s' -> '/')\n", argv[1]);
+		if(root_status != 1) {
+			printk("Waring: you are trying to mount a device to root ('%s' -> '/')\n", argv[1]);
+		} else {
+			printk("Error: root filesystem already mounted\n");
+			print_erro("Error: root filesystem already mounted\n");
+			return;
+		}
 	}
 	if(vfs_mount(argv[1], path) != 0) {
 		printk("Failed to mount device: %s\n", argv[1]);
 		return;
+	} else {
+		root_status = 1;
 	}
 	return;
 }

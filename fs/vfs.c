@@ -15,6 +15,7 @@
 #include "list.h"
 #include "string.h"
 #include "memory.h"
+#include "file.h"
 
 #define finline static
 #define ALL_IMPLEMENTATION
@@ -254,9 +255,17 @@ int vfs_mount(const char* src, vfs_node_t node)
 		if (fs_callbacks[i]->mount(src, node) == 0) {
 			node->fsid = i;
 			node->root = node;
+			print_succ("");
+			if(src != NULL) {
+				printlog_serial(INFO_LEVEL, "VFS: mount device(%s) to %s\n", src, vfs_node_to_path(node));
+			} else {
+				printlog_serial(INFO_LEVEL, "VFS: mount device(NULL) to %s\n", vfs_node_to_path(node));
+			}
 			return 0;
 		}
 	}
+	print_erro("");
+	printlog_serial(ERRO_LEVEL, "VFS: Failed to mount device: %s\n",src);
 	return -1;
 }
 
@@ -277,9 +286,9 @@ int vfs_write(vfs_node_t file, void *addr, size_t offset, size_t size)
 int vfs_umount(const char* path)
 {
 	vfs_node_t node = vfs_open(path);
-	if (node == NULL) return -1;
-	if (node->type != file_dir) return -1;
-	if (node->fsid == 0) return -1;
+	if (node == NULL) goto umount_err;
+	if (node->type != file_dir) goto umount_err;
+	if (node->fsid == 0) goto umount_err;
 	if (node->parent) {
 		vfs_node_t cur = node;
 		node		   = node->parent;
@@ -292,9 +301,14 @@ int vfs_umount(const char* path)
 			cur->child  = NULL;
 			// cur->type   = file_none;
 			if (cur->fsid) do_update(cur);
+			print_succ("");
+			printlog_serial(INFO_LEVEL,"VFS: umount: %s\n", path);
 			return 0;
 		}
 	}
+	umount_err:
+	print_erro("VFS: umount failed with path: ");
+	printlog_serial(ERRO_LEVEL, "%s\n", path);
 	return -1;
 }
 
