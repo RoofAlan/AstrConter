@@ -126,15 +126,10 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 
 
 	if (find_cmdargs("root",get_cmdline(),get_cmdline_count()) == NULL){
-		if (vfs_do_search(vfs_open("/dev"), "hda")) {
-			vfs_mount("/dev/hda", vfs_open("/"));
-			print_succ("Root filesystem mounted ('/dev/hda' -> '/')\n");
+		if(find_cmdline_args("dbg-shell=on",get_cmdline(),get_cmdline_count()) == 0) {
+			print_warn("The root filesystem could not be mounted\n");
 		} else {
-			if(strcmp(find_cmdargs("dbg-shell",get_cmdline(), get_cmdline_count()), "on") == 0) {
-				print_warn("The root file system could not be mounted.\n");
-			} else {
-				panic("The root file system could not be mounted.");
-			}
+			panic("The root filesystem could not be mounted");
 		}
 	} else {
 		mount_from_cmdline(find_cmdargs("root", get_cmdline(), get_cmdline_count()));
