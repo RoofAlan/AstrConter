@@ -64,6 +64,8 @@ AstrConter.iso: astrknl
 	@echo '	boot' >> iso/boot/grub/grub.cfg
 	@echo '}' >> iso/boot/grub/grub.cfg
 
+	@echo 'Hello world' > iso/hello.txt
+
 	@grub-mkrescue --locales="" --output=AstrConter.iso iso
 	@rm -rf iso
 	@printf " Compilation complete.\n"

@@ -83,6 +83,7 @@ void shell_help(void)
            "| ls        | Lists the current directory files.    |\n"
 		   "| slogo     | Show the kernel logo                  |\n"
 		   "| free      | Display the memory status             |\n"
+		   "| cat       | Read the file                         |\n"
            "| cetsl     | Enable/Disable serial console output. |\n"
            "+-----------+---------------------------------------+\n");
 	printk("+----------------------------------+----------------------------------+\n"
@@ -126,6 +127,29 @@ void shell_proc(void)
 void shell_hltst(void)
 {
 	panic(P000);
+}
+
+void shell_cat(int argc, char *argv[]) {
+	if (argc == 1) {
+        printk("Usage: %s <file>\n", argv[0]);
+        return;
+    }
+    char bufx[100];
+    sprintf(bufx, "%s", argv[1]);
+    vfs_node_t file = vfs_open(bufx);
+    if (file != NULL) {
+        char *buf = kmalloc(file->size);
+        if (vfs_read(file, buf, 0, file->size) == -1) {
+            goto read_error;
+        }
+        for (size_t i = 0; i < file->size; i++) {
+            printk("%c", buf[i]);
+        }
+        printk("\n");
+        return;
+    }
+    read_error:
+    printk("Cannot read file.\n");
 }
 
 void shell_taskkill(int argc, char *argv[])
@@ -279,6 +303,7 @@ builtin_cmd_t builtin_cmds[] = {
 	{"free",(void (*)(int, char **))shell_free},
 	{"cetsl", shell_cetsl},
 	{"slogo", shell_slogo},
+	{"cat", shell_cat}
 };
 
 /* 内建命令数量 */
@@ -378,7 +403,7 @@ void shell(const char *cmdline)
 	while (1) {
 		while(cmd[0] == 0) {
 			memset(cmd, 0, MAX_COMMAND_LEN);					// 清空上轮输入
-			sprintf(prompt, "\033[32muser@localhost: \033[34m%s\033[0m # ", vfs_node_to_path(working_dir));
+			sprintf(prompt, "\033[32mUser@localhost: \033[34m%s\033[0m # ", vfs_node_to_path(working_dir));
 			pl_readline(pl, prompt, (char *)cmd, MAX_COMMAND_LEN);
 		}
 
@@ -397,16 +422,17 @@ void shell(const char *cmdline)
 		}
 
 		int cmd_index = find_cmd(argv[0]);
+		char bin_name[100];
 		char bin_path[100];
 		if (cmd_index < 0) {
-			if (vfs_do_search(vfs_open("/"),"sbin") && vfs_do_search(vfs_open("/sbin"), (const char *)argv[0])) {
-				sprintf(bin_path, "/sbin/%s", (const char *)argv[0]);
-				// load_elf_file(bin_path);
-				elf_thread(bin_path, 0, bin_path, USER_TASK);
-			} else {
-				/* 找不到该命令 */
-				printk("%s: Command not found\n", argv[0]);
-			}
+			sprintf(bin_name, "%s.AS", (const char *)argv[0]);
+			// if (vfs_do_search(vfs_open(vfs_node_to_path(working_dir)), bin_name)) {
+			// 	sprintf(bin_path, "%s/%s", working_dir->name, bin_name);
+			// 	elf_thread(bin_path, argv[1], bin_name, USER_TASK);
+			// } else {
+			/* 找不到该命令 */
+			printk("%s: Command not found\n", argv[0]);
+			// }
 		} else {
 			builtin_cmds[cmd_index].func(argc, (char **)argv);
 		}
