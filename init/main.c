@@ -49,6 +49,19 @@ int kthread_shell(void *arg)
 	return 0;
 }
 
+/* 利用命令行参数挂载根目录 */
+static void mount_from_cmdline(const char *path) {
+	if(vfs_mount(path, vfs_open("/")) == 0) {
+		print_succ("Root filesystem mounted");
+		printlog_serial(INFO_LEVEL," ('%s' -> '/')\n",path);
+	} else if (strcmp(find_cmdargs("dbg-shell", get_cmdline(), get_cmdline_count()), "on") == 0){
+		print_warn("The root file system could not be mounted\n");
+	} else {
+		panic("The root file system could not be mounted");
+	}
+	return;
+}
+
 /* 内核入口 */
 void kernel_init(multiboot_t *glb_mboot_ptr)
 {
@@ -110,15 +123,21 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	fatfs_regist();
 	iso9660_regist();
 	file_init();
-	if (vfs_do_search(vfs_open("/dev"), "hda")) {
-		vfs_mount("/dev/hda", vfs_open("/"));
-		print_succ("Root filesystem mounted ('/dev/hda' -> '/')\n");
-	} else {
-		if(strcmp(find_cmdargs("dbg-shell",get_cmdline(), get_cmdline_count()), "on") == 0) {
-			print_warn("The root file system could not be mounted.\n");
+
+
+	if (find_cmdargs("root",get_cmdline(),get_cmdline_count()) == NULL){
+		if (vfs_do_search(vfs_open("/dev"), "hda")) {
+			vfs_mount("/dev/hda", vfs_open("/"));
+			print_succ("Root filesystem mounted ('/dev/hda' -> '/')\n");
 		} else {
-			panic("The root file system could not be mounted.");
+			if(strcmp(find_cmdargs("dbg-shell",get_cmdline(), get_cmdline_count()), "on") == 0) {
+				print_warn("The root file system could not be mounted.\n");
+			} else {
+				panic("The root file system could not be mounted.");
+			}
 		}
+	} else {
+		mount_from_cmdline(find_cmdargs("root", get_cmdline(), get_cmdline_count()));
 	}
 
 	init_timer(1);
