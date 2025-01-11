@@ -64,7 +64,7 @@ AstrConter.iso: astrknl
 	@echo '	boot' >> iso/boot/grub/grub.cfg
 	@echo '}' >> iso/boot/grub/grub.cfg
 
-	@echo 'Hello world' > iso/hello.txt
+	@printf 'Hello, AstrConter! This hello.txt. You should use the "cat" command to read this file' > iso/hello.txt
 
 	@grub-mkrescue --locales="" --output=AstrConter.iso iso
 	@rm -rf iso
