@@ -91,6 +91,14 @@ runk: astrknl
 runk_db: astrknl
 	$(QEMU) $(QEMU_FLAGS) -kernel astrknl -d in_asm -append "$(KERNEL_APPEND)"
 
+.PHONY: run_kvm
+run_kvm: AstrConter.iso
+	$(QEMU) $(QEMU_FLAGS) -cdrom AstrConter.iso -enable-kvm
+
+.PHONY: runk_kvm
+runk_kvm: astrknl
+	$(QEMU) $(QEMU_FLAGS) -kernel astrknl -append "$(KERNEL_APPEND)" -enable-kvm
+
 .PRECIOUS: $(OBJS)
 
 -include $(DEPS)
