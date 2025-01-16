@@ -167,12 +167,7 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	if(find_cmdline_args("shell-log=off", get_cmdline(), get_cmdline_count()) == 0 && get_loglevel() > 0) {
 		set_loglevel(1);
 	}
-	// terminal_set_auto_flush(0);
 	while(1) {
-		// uint32_t eflags = load_eflags();
-		// if(eflags & (1 << 9)) disable_intr();
-		// terminal_flush();
-		// if(eflags & (1 << 9)) enable_intr();
 		free_pages();
 		__asm__ __volatile__("hlt");
 	}

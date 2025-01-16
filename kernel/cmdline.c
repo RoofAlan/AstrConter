@@ -96,7 +96,7 @@ int init_cmdline(multiboot_t *info) {
 void print_cmdline()
 {
 	char **c = get_cmdline();
-	print_succ("Cmdline: ");
+	print_succ("Command line: ");
 	for (int i=0; i<get_cmdline_count(); i++) {
 		printlog_serial(INFO_LEVEL,"%s ", c[i]);
 	}

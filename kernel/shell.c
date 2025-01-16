@@ -132,7 +132,7 @@ void shell_proc(void)
 
 void shell_hltst(void)
 {
-	panic(P000);
+	panic("%s",P000);
 }
 
 void shell_cat(int argc, char *argv[]) {

@@ -67,12 +67,19 @@ void panic(const char *format, ...)
 	va_end(args);
 
 	buff[i] = '\0';
-	printlog_serial(PANIC_LEVEL, "%s <STACK [info at 0x%X]\n", prop, &kernel_elf);
+
+	char *vdr, *mdn;
+	int pbs, vbs; 
+	get_cpu_info(&vdr, &mdn, &pbs, &vbs);
+	printlog_serial(PANIC_LEVEL, "%s CPU: %s  Vendor: %s\n", prop, mdn, vdr);
+
+	printlog_serial(PANIC_LEVEL, "%s Call trace: [info at 0x%X]\n", prop, &kernel_elf);
+	printlog_serial(PANIC_LEVEL, "%s <TASK>\n", prop);
 	for(int j = 0; j < 5; j++) {
-		printlog_serial(PANIC_LEVEL, "%s   0x%08X %s\n", prop, eips[ps++], syname[sy++]);
+		printlog_serial(PANIC_LEVEL, "%s  [<%08X>] %s\n", prop, eips[ps++], syname[sy++]);
 	}
-	printlog_serial(PANIC_LEVEL, "%s /STACK>\n", prop);
-	printlog_serial(PANIC_LEVEL,"%s - end Kernel panic - not syncing: %s ", prop, buff);
+	printlog_serial(PANIC_LEVEL, "%s </TASK>\n", prop);
+	printlog_serial(PANIC_LEVEL,"%s ---[ end Kernel panic - not syncing: %s ", prop, buff);
 	krn_halt();
 }
 
