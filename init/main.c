@@ -70,6 +70,7 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 
 	init_bochs(glb_mboot_ptr);
 	init_vbe(glb_mboot_ptr, 0x151515, 0xffffff);
+	terminal_set_color_scheme(3);	// 重置终端主题
 	/* 检测内存是否达到最低要求 */
 	if ((glb_mboot_ptr->mem_upper + glb_mboot_ptr->mem_lower) / 1024 + 1 < 16) {
 		panic(P001);
@@ -144,7 +145,6 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	sleep(10);
 	system_beep(0);
 
-	terminal_set_color_scheme(0);	// 重置终端主题
 	console_to_serial(0);				// 停止输出内核启动日志到串口
 	
 	enable_scheduler();
