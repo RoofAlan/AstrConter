@@ -67,7 +67,7 @@ void panic(const char *format, ...)
 	va_end(args);
 
 	buff[i] = '\0';
-	printlog_serial(PANIC_LEVEL, "%s <STACK\n", prop);
+	printlog_serial(PANIC_LEVEL, "%s <STACK [info at 0x%X]\n", prop, &kernel_elf);
 	for(int j = 0; j < 5; j++) {
 		printlog_serial(PANIC_LEVEL, "%s   0x%08X %s\n", prop, eips[ps++], syname[sy++]);
 	}
