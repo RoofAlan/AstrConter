@@ -36,15 +36,15 @@ makedirs:
 	$(Q)mkdir -p $(dir $(OBJS))
 
 $(BUILDDIR)/%.o: %.c | makedirs
-	$(Q)printf "  CC\t\t$@\n"
+	$(Q)printf "  CC      $@\n"
 	$(Q)$(CC) $(C_FLAGS) -o $@ $<
 
 $(BUILDDIR)/%.o: %.s | makedirs
-	$(Q)printf "  ASM\t\t$@\n"
+	$(Q)printf "  ASM     $@\n"
 	$(Q)$(ASM) $(ASM_FLAGS) -o $@ $<
 
 astrknl: $(OBJS) $(LIBS)
-	$(Q)printf "  LD\t\t$@\n"
+	$(Q)printf "  LD      $@\n"
 	$(Q)$(LD) $(LD_FLAGS) -o $@ $^
 
 .PHONY: grub_iso
