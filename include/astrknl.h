@@ -12,8 +12,8 @@
 
 #define BUILD_DATE __DATE__
 #define BUILD_TIME __TIME__
-#define KERNL_VERS "v0.99.12-ArchLinux-beta"
-#define KERNL_BUID 2025-115+1909
+#define KERNL_VERS "v0.99.14-ArchLinux-beta"
+#define KERNL_BUID 2025-116+1212
 
 /* 内核开关 */
 //#define DEBUG_SHELL

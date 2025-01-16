@@ -52,6 +52,11 @@ void get_cur_status(uint16_t* ring, uint16_t* regs1, uint16_t* regs2, uint16_t* 
 /* 内核异常 */
 void panic(const char *format, ...)
 {
+	int ps = 0, sy = 0;
+	uint32_t eips[5];
+	const char *syname[5];
+	get_stack_trace(eips, syname);
+	const char *prop = "[ \033[31m! ! ! !\033[0m ]";
 	/* 避免频繁创建临时变量，内核的栈很宝贵 */
 	static char buff[1024];
 	va_list args;
@@ -62,9 +67,12 @@ void panic(const char *format, ...)
 	va_end(args);
 
 	buff[i] = '\0';
-
-	//printk("[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---", buff); 
-	printlog_serial(PANIC_LEVEL,"[ \033[31m! ! ! !\033[0m ] ---[ end Kernel panic - not syncing: %s ]---", buff);
+	printlog_serial(PANIC_LEVEL, "%s <STACK\n", prop);
+	for(int j = 0; j < 5; j++) {
+		printlog_serial(PANIC_LEVEL, "%s   0x%08X %s\n", prop, eips[ps++], syname[sy++]);
+	}
+	printlog_serial(PANIC_LEVEL, "%s /STACK>\n", prop);
+	printlog_serial(PANIC_LEVEL,"%s - end Kernel panic - not syncing: %s ", prop, buff);
 	krn_halt();
 }
 
