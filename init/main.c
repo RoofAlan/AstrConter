@@ -164,8 +164,8 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 			panic("No working init found");
 		}
 	}
-	if(find_cmdline_args("shell-log=off", get_cmdline(), get_cmdline_count()) == 0) {
-		set_loglevel(0);
+	if(find_cmdline_args("shell-log=off", get_cmdline(), get_cmdline_count()) == 0 && get_loglevel() > 0) {
+		set_loglevel(1);
 	}
 	// terminal_set_auto_flush(0);
 	while(1) {
