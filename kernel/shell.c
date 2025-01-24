@@ -507,8 +507,7 @@ void shell(const char *cmdline)
 			printk("Out of MAX_ARGS(30)");
 			continue;
 		} else if (argc == 0) {
-			vbe_write_newline();
-			continue;
+			printk("\0");
 		}
 
 		int cmd_index = find_cmd(argv[0]);
@@ -519,7 +518,7 @@ void shell(const char *cmdline)
 			// 	elf_thread(bin_path, argv[1], bin_name, USER_TASK);
 			// } else {
 			/* 找不到该命令 */
-			printk("%s: Command not found\n", argv[0]);
+			if(argc != 0) printk("%s: Command not found\n", argv[0]);
 			// }
 		} else {
 			builtin_cmds[cmd_index].func(argc, (char **)argv);

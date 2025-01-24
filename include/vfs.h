@@ -46,7 +46,7 @@ typedef struct vfs_callback {
 	vfs_stat_t stat;		// 保留备用
 } *vfs_callback_t;
 
-struct vfs_node { 	//vfs节点
+struct vfs_node { 			//vfs节点
 	vfs_node_t parent;		// 父目录
 	char	   *name;		// 名称
 	uint64_t   realsize;	// 项目真实占用的空间 (可选)
@@ -67,8 +67,8 @@ struct vfs_node { 	//vfs节点
 struct fd {
 	void *file;
 	size_t offset;
-	bool readable;
-	bool writeable;
+	int readable;
+	int writeable;
 };
 
 extern struct vfs_callback vfs_empty_callback;
@@ -88,7 +88,7 @@ int vfs_read(vfs_node_t file, void *addr, size_t offset, size_t size);	// 读取
 int vfs_write(vfs_node_t file, void *addr, size_t offset, size_t size);	// 写入节点
 int vfs_mount(const char* src, vfs_node_t node);						// 挂载指定设备至指定节点
 int vfs_umount(const char* path);										// 卸载指定设备的挂载点
-vfs_node_t get_rootdir(void);												// 获取根节点
-bool vfs_init(void);
+vfs_node_t get_rootdir(void);											// 获取根节点
+int vfs_init(void);
 
 #endif // INCLUDE_VFS_H_
