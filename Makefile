@@ -50,6 +50,11 @@ astrknl: $(OBJS) $(LIBS)
 .PHONY: grub_iso
 grub_iso: AstrConter.iso
 
+.PHONY: config
+menuconfig:
+	@kconfig-mconf Kconfig
+	@python3 Kconfig.py
+
 AstrConter.iso: astrknl
 	@echo
 	@printf "Packing ISO file...\n"

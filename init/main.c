@@ -36,13 +36,14 @@
 #include "fdc.h"
 #include "ide.h"
 #include "iso9660.h"
+#include "autoconfig.h"
 
 void shell(const char *); // 声明shell程序入口
 
 /* 内核shell进程 */
-int kthread_shell(void *arg)
+int kthread_shell(void *arg[])
 {
-	char *cmdline = strchr((char *)arg, ' ');
+	char *cmdline = strchr((char *)arg[0], ' ');
 	if(cmdline)
 		++cmdline;
 	shell(cmdline);
@@ -85,10 +86,9 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	print_succ("");
 	printlog_serial(INFO_LEVEL,"KernelArea: 0x00000000 - 0x%08X | GraphicsBuffer: 0x%08X\n", program_break_end,
                                                                     	 glb_mboot_ptr->framebuffer_addr);
-	
-	if(find_cmdline_args("klogo=on", get_cmdline(), get_cmdline_count()) == 0) {
-		bmp_analysis((Bmp *)klogo, vbe_get_width() - 200, 0, 1);
-	}
+#if SHOW_START_LOGO	
+	bmp_analysis((Bmp *)klogo, vbe_get_width() - 200, 0, 1);
+#endif
 	char *vdr, *mdn;
 	int pbs, vbs; 
 	get_cpu_info(&vdr, &mdn, &pbs, &vbs);
@@ -150,20 +150,22 @@ void kernel_init(multiboot_t *glb_mboot_ptr)
 	enable_scheduler();
 	print_succ("");
 	printlog_serial(INFO_LEVEL,"AstrCounter On %s\n", get_boot_tty());
-	if(find_cmdline_args("dbg-shell=on",get_cmdline(), get_cmdline_count()) == 0) {
-		kernel_thread(kthread_shell, (void *)((glb_mboot_ptr->flags&MULTIBOOT_INFO_CMDLINE)?glb_mboot_ptr->cmdline:0), "Shell", USER_TASK);
-	} else {
+#if DEBUG_SHELL
+		
+		multiboot_uint32_t arg[] = {(glb_mboot_ptr->flags & MULTIBOOT_INFO_CMDLINE) ? glb_mboot_ptr->cmdline : 0};
+		kernel_thread(kthread_shell, (void *)arg, "Shell", USER_TASK);
+#else
 		print_succ("Run /sbin/init ...\n");
 		if (vfs_do_search(vfs_open("/"), "sbin")) {
 			if (vfs_do_search(vfs_open("/sbin"), "init")) {
-				elf_thread("/sbin/init", 0, "INIT", USER_TASK);
+				execv_thread("/sbin/init", 0, "INIT", USER_TASK);
 			} else {
 				panic("No working init found");
 			}
 		} else {
 			panic("No working init found");
 		}
-	}
+#endif
 	if(find_cmdline_args("shell-log=off", get_cmdline(), get_cmdline_count()) == 0 && get_loglevel() > 0) {
 		set_loglevel(1);
 	}

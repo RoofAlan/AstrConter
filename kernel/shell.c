@@ -474,6 +474,17 @@ static void plreadln_flush(void)
 	/* Nothing */
 }
 
+/* 末尾判断 */
+static int ends_with(const char *str, const char *suffix)
+{
+	unsigned int str_len = strlen(str);
+	unsigned int suffix_len = strlen(suffix);
+	if (suffix_len > str_len) {
+		return 0;
+	}
+	return strncmp(str + str_len - suffix_len, suffix, suffix_len) == 0;
+}
+
 /* shell主程序 */
 void shell(const char *cmdline)
 {
@@ -512,14 +523,31 @@ void shell(const char *cmdline)
 
 		int cmd_index = find_cmd(argv[0]);
 		if (cmd_index < 0) {
-			// sprintf(bin_name, "%s.AS", (const char *)argv[0]);
-			// if (vfs_do_search(vfs_open(vfs_node_to_path(working_dir)), bin_name)) {
-			// 	sprintf(bin_path, "%s/%s", working_dir->name, bin_name);
-			// 	elf_thread(bin_path, argv[1], bin_name, USER_TASK);
-			// } else {
-			/* 找不到该命令 */
-			if(argc != 0) printk("%s: Command not found\n", argv[0]);
-			// }
+			char buf_h[14];
+			char bufx[15];
+			int pid;
+			if (!ends_with((const char *)argv[0], ".elf")) {
+				sprintf(buf_h, "%s.elf", argv[0]);
+			} else {
+				sprintf(buf_h, "%s", argv[0]);
+			}
+			if (buf_h[0] != '/') {
+				if (!strcmp(vfs_node_to_path(working_dir), "/")) {
+					sprintf(bufx, "/%s", buf_h);
+				} else {
+					sprintf(bufx, "%s/%s", vfs_node_to_path(working_dir), buf_h);
+				}
+			} else {
+				sprintf(bufx, "%s", buf_h);
+			}
+			if ((pid = execv_thread(bufx, (void *)argv, (const char *)bufx, USER_TASK)) == -1) {
+				if (argc != 0) printk("Command not found.\n");
+			}
+			struct task_struct *pcb;
+			do {
+				pcb = found_task_pid(pid);
+				if (pcb == 0) break;
+			} while (1);
 		} else {
 			builtin_cmds[cmd_index].func(argc, (char **)argv);
 		}

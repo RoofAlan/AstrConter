@@ -7,15 +7,15 @@
  *
  */
 
-#ifndef INCLUDE_UINXED_H_
-#define INCLUDE_UINXED_H_
+#ifndef INCLUDE_ASTRKNL_H_
+#define INCLUDE_ASTRKNL_H_
 
 #define BUILD_DATE __DATE__
 #define BUILD_TIME __TIME__
-#define KERNL_VERS "v0.99.18-ArchLinux-beta"
+#define KERNL_VERS "v0.99.20-ArchLinux-beta"
 #define KERNL_BUID 2025-124+855
 
 /* 内核开关 */
 //#define DEBUG_SHELL
 
-#endif // INCLUDE_UINXED_H_
+#endif // INCLUDE_ASTRKNL_H_

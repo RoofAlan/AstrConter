@@ -55,7 +55,7 @@ struct elf_t {
 } elf_t;
 
 void segment_callback(struct ElfSegment segment);
-uint32_t elf_load(size_t elf_size,uint8_t *elf_data);
+uint32_t elf_load(size_t elf_size, uint8_t *elf_data);
 
 /* 从 multiboot_t 结构获取ELF信息 */
 elf_t elf_from_multiboot(multiboot_elf_section_header_table_t *mb);

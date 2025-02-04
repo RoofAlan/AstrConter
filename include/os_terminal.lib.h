@@ -17,22 +17,22 @@
 #include "types.h"
 
 typedef enum TerminalInitResult {
-  Success,
-  MallocIsNull,
-  FreeIsNull,
-  FontBufferIsNull,
+	Success,
+	MallocIsNull,
+	FreeIsNull,
+	FontBufferIsNull,
 } TerminalInitResult;
 
 typedef struct TerminalDisplay {
-  size_t width;
-  size_t height;
-  uint32_t *address;
+	size_t width;
+	size_t height;
+	uint32_t *address;
 } TerminalDisplay;
 
 typedef struct TerminalPalette {
-  uint32_t foreground;
-  uint32_t background;
-  uint32_t ansi_colors[16];
+	uint32_t foreground;
+	uint32_t background;
+	uint32_t ansi_colors[16];
 } TerminalPalette;
 
 #if defined(TERMINAL_EMBEDDED_FONT)
@@ -63,6 +63,8 @@ void terminal_set_auto_flush(bool auto_flush);
 void terminal_set_auto_crnl(bool auto_crnl);
 void terminal_set_bell_handler(void (*handler)(void));
 void terminal_set_color_scheme(size_t palette_index);
+void terminal_handle_mouse_move(int16_t x, int16_t y);
+void terminal_handle_mouse_scroll(float delta);
 void terminal_set_custom_color_scheme(const struct TerminalPalette *palette);
 const char *terminal_handle_keyboard(uint8_t scancode);
 

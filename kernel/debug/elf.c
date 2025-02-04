@@ -23,7 +23,7 @@ void segment_callback(struct ElfSegment segment)
 	memcpy((void*)segment.address,segment.data,segment.size);
 }
 
-uint32_t elf_load(size_t elf_size,uint8_t *elf_data)
+uint32_t elf_load(size_t elf_size, uint8_t *elf_data)
 {
 	struct ElfParseResult result = parse_elf(elf_data, elf_size, segment_callback);
 	switch (result.tag) {
