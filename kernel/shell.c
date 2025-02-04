@@ -541,7 +541,7 @@ void shell(const char *cmdline)
 				sprintf(bufx, "%s", buf_h);
 			}
 			if ((pid = execv_thread(bufx, (void *)argv, (const char *)bufx, USER_TASK)) == -1) {
-				if (argc != 0) printk("Command not found.\n");
+				if (argc != 0) printk("%s: Command not found.\n", argv[0]);
 			}
 			struct task_struct *pcb;
 			do {
