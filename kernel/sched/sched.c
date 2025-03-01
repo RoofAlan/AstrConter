@@ -42,7 +42,7 @@ void init_sched(void)
 	current->stack = current;			// 该成员指向栈低地址
 	current->pgd_dir = kernel_directory;
 	current->mem_size = 0;
-	current->name = "Uinxed-Kernel";	// 内核进程名称
+	current->name = "astrknl";	// 内核进程名称
 	current->fpu_flag = 0;				// 还没使用FPU
 	current->cpu_clock = 0;
 	current->sche_time = 1;
