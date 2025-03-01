@@ -12,7 +12,7 @@
 
 #define BUILD_DATE __DATE__
 #define BUILD_TIME __TIME__
-#define KERNL_VERS "v0.99.21-ArchLinux-beta"
-#define KERNL_BUID 2025-221+1735
+#define KERNL_VERS "v0.99.22-ArchLinux-beta"
+#define KERNL_BUID 2025-301+850
 
 #endif // INCLUDE_ASTRKNL_H_
